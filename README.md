@@ -24,7 +24,7 @@ BlofeldParam.byName.do({ |p| p.asString.postln; });
 ~blofeld.initSound();
 ```
 ### randomize sound
-```
+```supercollider
 ~blofeld.randomizeSound(); // randomize everything
 ~blofeld.randomizeSound(\filter1); // randomize filter1 only
 ```
