@@ -47,7 +47,6 @@ BlofeldParam.byName.keys.postln;
 ~blofeld.selectSound(1, 90); // B091
 ~blofeld.requestSound();
 ~cutoff = ~blofeld.getParam(\filter1Cutoff);
-~blofeld.noteOn(60, 127);
 p = Pspawn(Pbind(
 	\method, \par,
 	\pattern, Pfunc {
