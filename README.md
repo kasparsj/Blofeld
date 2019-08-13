@@ -28,7 +28,7 @@ BlofeldParam.byName.do({ |p| p.asString.postln; });
 ~blofeld.randomizeSound(); // randomize everything
 ~blofeld.randomizeSound(\filter1); // randomize filter1 only
 ```
-### change one param
+### change single param
 ```supercollider
 ~blofeld.setParam(\filter1Type, rrand(0, 10));
 ~blofeld.setParam(\filter1Cutoff, rrand(0, 127));
