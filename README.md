@@ -33,7 +33,7 @@ BlofeldParam.byName.keys.postln;
 ~blofeld.setParam(\filter1Type, rrand(0, 10));
 ~blofeld.setParam(\filter1Cutoff, rrand(0, 127));
 ```
-### full example
+### full example filter1
 ```supercollider
 // 1. selects a random sound sound
 // 2. every 10 seconds:
@@ -41,11 +41,9 @@ BlofeldParam.byName.keys.postln;
 // - changes filter 1 resonance
 // - sets a new target cutoff frequence for filter 1
 (
-var bank = rrand(0, Blofeld.bank.size-1);
-var program = rrand(0, 127);
 ~blofeld = Blofeld.new();
 ~blofeld.connect("Blofeld", "");
-~blofeld.selectSound(bank, program);
+~blofeld.selectSound(1, 90); // B091 Clavinetro
 ~blofeld.requestSound({
 	~cutoff = ~blofeld.getParam(\filter1Cutoff);
 	~blofeld.noteOn(60, 127);
@@ -68,17 +66,21 @@ var program = rrand(0, 127);
 		\delta, Pwhite(16, 64, inf)
 	)).play;
 });
-t = Pspawner({ |sp|    // sp = the Spawner object
+)
+p.stop;
+
+(
+r = Routine({
 	loop {
+		var speed = 1/3;
 		var current = ~blofeld.getParam(\filter1Cutoff);
-		var value = current + ((~cutoff - current) / 2);
+		var value = current + ((~cutoff - current) * speed);
 		~blofeld.setParam(\filter1Cutoff, value);
 		~blofeld.setParam(\filter1Resonance, ~resonance);
-		sp.wait(0.25);
+		0.25.wait;
 	}
 }).play;
 )
-p.stop;
-t.stop;
+r.stop;
 ~blofeld.noteOff();
 ```
