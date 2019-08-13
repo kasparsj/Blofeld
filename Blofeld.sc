@@ -43,7 +43,7 @@ Blofeld {
 			});
 		});
 		MIDIIn.addFuncTo(\sysex, {|src, sysex| this.parseSysex(sysex); });
-		midiOut = MIDIOut.newByName(deviceName, portName).latency_(0);
+		midiOut = MIDIOut.newByName(deviceName, portName);
 	}
 
 	parseSysex { |packet|
@@ -115,7 +115,7 @@ Blofeld {
 
 	setProgram { |num, chan = 0|
 		midiOut.program(chan, num);
-		sounds.removeAt(this.soundKey());
+		sounds.removeAt(this.getKey());
 	}
 
 	getParam { |param|
