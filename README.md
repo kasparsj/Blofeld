@@ -46,25 +46,25 @@ BlofeldParam.byName.keys.postln;
 ~blofeld.selectSound(1, 90); // B091
 ~blofeld.requestSound();
 ~cutoff = ~blofeld.getParam(\filter1Cutoff);
-	~blofeld.noteOn(60, 127);
-	p = Pspawn(Pbind(
-		\method, \par,
-		\pattern, Pfunc {
-			Pbind(
-				\type, \midi,
-				\midicmd, \noteOn,
-				\midiout, ~blofeld.midiOut,
-				\scale, Scale.minor,
-				\degree, Prand(Scale.minor.degrees, inf),
-				\dur, 10,
-				\setCutoff, Pfunc{
-					~cutoff = rrand(0, 127);
-					~resonance = rrand(0, 127);
-				}
-			);
-		},
-		\delta, Pwhite(32, 128, inf)
-	)).play;
+~blofeld.noteOn(60, 127);
+p = Pspawn(Pbind(
+	\method, \par,
+	\pattern, Pfunc {
+		Pbind(
+			\type, \midi,
+			\midicmd, \noteOn,
+			\midiout, ~blofeld.midiOut,
+			\scale, Scale.minor,
+			\degree, Prand(Scale.minor.degrees, inf),
+			\dur, 10,
+			\setCutoff, Pfunc{
+				~cutoff = rrand(0, 127);
+				~resonance = rrand(0, 127);
+			}
+		);
+	},
+	\delta, Pwhite(32, 128, inf)
+)).play;
 )
 p.stop;
 ~blofeld.noteOff();
