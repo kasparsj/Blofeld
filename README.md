@@ -33,7 +33,7 @@ BlofeldParam.byName.keys.postln;
 ~blofeld.setParam(\filter1Type, rrand(0, 10));
 ~blofeld.setParam(\filter1Cutoff, rrand(0, 127));
 ```
-### full example filter1
+### full example
 ```supercollider
 // 1. selects a random sound sound
 // 2. using Pspawn in parallel:
