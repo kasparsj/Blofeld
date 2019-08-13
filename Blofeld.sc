@@ -174,8 +174,8 @@ Blofeld {
 		packet = packet.add(deviceID);
 		packet = packet.add(paramChange);
 		packet = packet.add(location);
-		packet = packet.add(param.sysex / 127);
-		packet = packet.add(param.sysex % 127);
+		packet = packet.add(param.sysex / 128);
+		packet = packet.add(param.sysex % 128);
 		packet = packet.add(value);
 		packet = packet.add(sysexEnd);
 		^packet;

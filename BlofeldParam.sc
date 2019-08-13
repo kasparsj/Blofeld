@@ -119,7 +119,7 @@ BlofeldParam {
 			BlofeldParam.new(\effect1Type, 128, nil, (0..127)),
 			BlofeldParam.new(\effect1Mix, 129, 93, (0..127)),
 			BlofeldParam.new(\effect1Param1, 130, nil, (0..127)),
-			BlofeldParam.new(\effect1Param2131, nil, (0..127)),
+			BlofeldParam.new(\effect1Param2, nil, (0..127)),
 			BlofeldParam.new(\effect1Param3, 132, nil, (0..127)),
 			BlofeldParam.new(\effect1Param4, 133, nil, (0..127)),
 			BlofeldParam.new(\effect1Param5, 134, nil, (0..127)),
