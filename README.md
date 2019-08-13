@@ -36,10 +36,10 @@ BlofeldParam.byName.keys.postln;
 ### full example filter1
 ```supercollider
 // 1. selects a random sound sound
-// 2. every 10 seconds:
-// - plays a new note from minor scale
-// - changes filter 1 resonance
-// - sets a new target cutoff frequence for filter 1
+// 2. using Pspawn in parallel:
+// - play a new note from minor scale
+// - change filter 1 resonance to a random value
+// - sets a new target cutoff frequency for filter 1 to animate to
 (
 ~blofeld = Blofeld.new();
 ~blofeld.connect("Blofeld", "");
