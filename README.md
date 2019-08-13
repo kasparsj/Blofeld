@@ -17,7 +17,7 @@ var program = rrand(0, 127);
 ~blofeld.requestSound();
 ~blofeld.getParam(\filter1Type).postln;
 // print implemented param names
-BlofeldParam.byName.do({ |p| p.asString.postln; });
+BlofeldParam.byName.keys.postln;
 ```
 ### init sound
 ```supercollider
