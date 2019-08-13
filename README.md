@@ -43,9 +43,9 @@ BlofeldParam.byName.keys.postln;
 (
 ~blofeld = Blofeld.new();
 ~blofeld.connect("Blofeld", "");
-~blofeld.selectSound(1, 90); // B091 Clavinetro
-~blofeld.requestSound({
-	~cutoff = ~blofeld.getParam(\filter1Cutoff);
+~blofeld.selectSound(1, 90); // B091
+~blofeld.requestSound();
+~cutoff = ~blofeld.getParam(\filter1Cutoff);
 	~blofeld.noteOn(60, 127);
 	p = Pspawn(Pbind(
 		\method, \par,
@@ -63,11 +63,11 @@ BlofeldParam.byName.keys.postln;
 				}
 			);
 		},
-		\delta, Pwhite(16, 64, inf)
+		\delta, Pwhite(32, 128, inf)
 	)).play;
-});
 )
 p.stop;
+~blofeld.noteOff();
 
 (
 r = Routine({
@@ -82,5 +82,15 @@ r = Routine({
 }).play;
 )
 r.stop;
-~blofeld.noteOff();
+
+(
+d = Routine({
+	loop {
+		var value = ~blofeld.getParam(\effect2Mix) + 1;
+		~blofeld.setParam(\effect2Mix, if (value > 127, { 0 }, { value }));
+		1.wait;
+	}
+}).play;
+)
+d.stop;
 ```
