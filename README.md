@@ -57,6 +57,7 @@ p = Pspawn(Pbind(
 			\midiout, ~blofeld.midiOut,
 			\scale, Scale.minor,
 			\degree, Prand(Scale.minor.degrees, inf),
+			\octave, Pwhite(2, 5, inf),
 			\dur, 10,
 			\setCutoff, Pfunc{
 				~cutoff = rrand(0, 127);
@@ -68,7 +69,6 @@ p = Pspawn(Pbind(
 )).play;
 )
 p.stop;
-~blofeld.noteOff();
 
 (
 r = Routine({
