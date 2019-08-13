@@ -40,6 +40,7 @@ BlofeldParam.byName.keys.postln;
 // - play a new note from minor scale
 // - change filter 1 resonance to a random value
 // - sets a new target cutoff frequency for filter 1 to animate to
+// 3. animate effect2Mix every second
 (
 ~blofeld = Blofeld.new();
 ~blofeld.connect("Blofeld", "");
