@@ -8,7 +8,7 @@
 ```
 ### select a random sound
 ```
-var bank = rrand(0, Blofeld.bank.size-1);
+var bank = rrand(0, 7);
 var program = rrand(0, 127);
 ~blofeld.selectSound(bank, program);
 ```
@@ -16,6 +16,8 @@ var program = rrand(0, 127);
 ```
 ~blofeld.requestSound();
 ~blofeld.getParam(\filter1Type).postln;
+// print implemented param names
+BlofeldParam.byName.do({ |p| p.asString.postln; });
 ```
 ### init sound
 ```
