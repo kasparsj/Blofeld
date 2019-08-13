@@ -17,6 +17,7 @@ Blofeld {
 
 	var <>deviceID;
 	var <sounds;
+	var <callbacks;
 	var <midiOut;
 
 	*initClass {
@@ -29,7 +30,7 @@ Blofeld {
 	}
 
 	*new { |deviceID = 0x00|
-		^super.newCopyArgs(deviceID, ());
+		^super.newCopyArgs(deviceID, (), ());
 	}
 
 	connect { |deviceName, portName|
@@ -48,25 +49,33 @@ Blofeld {
 	parseSysex { |packet|
 		switch (packet[4],
 			soundDump, {
-				this.getOrCreateSound(packet[5], packet[6]).data = packet[7..389];
+				var bank = packet[5];
+				var program = packet[6];
+				var key = this.getKey(bank, program);
+				this.getOrCreateSound(bank, program).data = packet[7..389];
+				if (callbacks[key] != nil, {
+					callbacks[key].value;
+					callbacks.removeAt(key);
+				});
 			}
 		);
 	}
 
-	getOrCreateSound { |bank, program|
-		var sound = this.getSound(bank, program);
+	getOrCreateSound { |bank = 0x7F, program = 0x00|
+		var key = this.getKey(bank, program);
+		var sound = sounds[key];
 		if (sound == nil, {
 			sound = BlofeldSound.new(bank, program);
-			sounds.put(this.soundKey(bank, program), sound);
+			sounds.put(key, sound);
 		});
 		^sound;
 	}
 
 	getSound { |bank = 0x7F, program = 0x00|
-		^sounds[this.soundKey(bank, program)];
+		^sounds[this.getKey(bank, program)];
 	}
 
-	soundKey { |bank = 0x7F, program = 0x00|
+	getKey { |bank = 0x7F, program = 0x00|
 		var key = "b" ++ bank.asHexString(2) ++ "p" ++ program.asHexString(2);
 		^key.asSymbol;
 	}
@@ -84,7 +93,11 @@ Blofeld {
 		this.setProgram(program, chan);
 	}
 
-	requestSound { |bank = 0x7F, program = 0x00|
+	requestSound { |callback = nil, bank = 0x7F, program = 0x00|
+		if (callback != nil, {
+			var key = this.getKey(bank, program);
+			callbacks.put(key, callback);
+		});
 		midiOut.sysex(this.soundRequestPacket(bank, program));
 	}
 
@@ -114,12 +127,13 @@ Blofeld {
 	setParam { |param, value = 0, chan = 0|
 		var bParam = BlofeldParam.byName[param];
 		var sound = this.getSound();
+		value = value.asInteger;
 		if (bParam != nil, {
-			if (bParam.control != nil, {
-				midiOut.control(chan, bParam.control, value);
-			}, {
+			if (bParam.sysex != nil, {
 				midiOut.sysex(this.paramChangePacket(bParam, value));
-				if (sound != nil, { sound.data[bParam.sysex] = value; })
+				if (sound != nil, { sound.data[bParam.sysex] = value; });
+			}, {
+				midiOut.control(chan, bParam.control, value);
 			});
 		});
 	}
