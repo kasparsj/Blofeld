@@ -42,55 +42,54 @@ BlofeldParam.byName.keys.postln;
 // - sets a new target cutoff frequency for filter 1 to animate to
 // 3. animate effect2Mix every second
 (
-~blofeld = Blofeld.new();
-~blofeld.connect("Blofeld", "");
+~blofeld = Blofeld.new("Blofeld", "");
 ~blofeld.selectSound(1, 90); // B091
-~blofeld.requestSound();
-~cutoff = ~blofeld.getParam(\filter1Cutoff);
-p = Pspawn(Pbind(
-	\method, \par,
-	\pattern, Pfunc {
+~blofeld.requestSound({
+	~cutoff = ~blofeld.getParam(\filter1Cutoff);
+	p = Ppar([
+		Pspawn(Pbind(
+			\method, \par,
+			\pattern, Pfunc {
+				Ppar([
+					Pbind(
+						\type, \midi,
+						\midicmd, \noteOn,
+						\midiout, ~blofeld.midiOut,
+						\scale, Scale.minor,
+						\degree, Prand(Scale.minor.degrees, inf),
+						\octave, Pwhite(2, 5, inf),
+						\dur, 10,
+					),
+					Pbind(
+						\type, \blofeld,
+						\filter1Resonance, Pwhite(0, 127, inf),
+						\setCutoff, Pfunc {
+							~cutoff = rrand(0, 127);
+						}
+					),
+				]);
+			},
+			\delta, Pwhite(32, 128, inf)
+		)),
 		Pbind(
-			\type, \midi,
-			\midicmd, \noteOn,
-			\midiout, ~blofeld.midiOut,
-			\scale, Scale.minor,
-			\degree, Prand(Scale.minor.degrees, inf),
-			\octave, Pwhite(2, 5, inf),
-			\dur, 10,
-			\setCutoff, Pfunc{
-				~cutoff = rrand(0, 127);
-				~resonance = rrand(0, 127);
-			}
-		);
-	},
-	\delta, Pwhite(32, 128, inf)
-)).play;
-)
-p.stop;
-
-(
-r = Routine({
-	loop {
-		var speed = 1/3;
-		var current = ~blofeld.getParam(\filter1Cutoff);
-		var value = current + ((~cutoff - current) * speed);
-		~blofeld.setParam(\filter1Cutoff, value);
-		~blofeld.setParam(\filter1Resonance, ~resonance);
-		0.25.wait;
-	}
-}).play;
-)
-r.stop;
-
-(
-d = Routine({
-	loop {
-		var value = ~blofeld.getParam(\effect2Mix) + 1;
-		~blofeld.setParam(\effect2Mix, if (value > 127, { 0 }, { value }));
-		1.wait;
-	}
-}).play;
+			\type, \blofeld,
+			\dur, 0.25,
+			\filter1Cutoff, Pfunc { |event|
+				var speed = 1/3;
+				var current = ~blofeld.getParam(\filter1Cutoff);
+				current + ((~cutoff - current) * speed);
+			},
+		),
+		Pbind(
+			\type, \blofeld,
+			\dur, 1,
+			\effect2Mix, Pfunc {
+				var value = ~blofeld.getParam(\effect2Mix) + 1;
+				if (value > 127, { 0 }, { value });
+			},
+		),
+	]).play;
+});
 )
 d.stop;
 ```
