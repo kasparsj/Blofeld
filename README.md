@@ -39,7 +39,7 @@ BlofeldParam.byName.keys.postln;
 ~blofeld.selectSound(1, 90); // select B091 (Clavinetro)
 ~blofeld.requestSound({ // request selected sound parameter values
 	~cutoff = ~blofeld.getParam(\filter1Cutoff);
-	p = Ppar([
+	Pdef(\blofeldFilterExample, Ppar([
 		Pspawn(Pbind(
 			\method, \par,
 			\pattern, Pfunc {
@@ -83,8 +83,8 @@ BlofeldParam.byName.keys.postln;
 				if (value > 127, { 0 }, { value }); // increase click-delay mix every second
 			},
 		),
-	]).play;
+	])).play;
 });
 )
-d.stop;
+Pdef(\blofeldFilterExample).stop;
 ```
