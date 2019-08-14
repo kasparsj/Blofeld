@@ -37,8 +37,7 @@ BlofeldParam.byName.keys.postln;
 (
 ~blofeld = Blofeld.new("Blofeld", "");
 ~blofeld.selectSound(1, 90); // select B091 (Clavinetro)
-// request sound information
-~blofeld.requestSound({
+~blofeld.requestSound({ // request selected sound parameter values
 	~cutoff = ~blofeld.getParam(\filter1Cutoff);
 	p = Ppar([
 		Pspawn(Pbind(
