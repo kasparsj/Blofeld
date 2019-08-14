@@ -14,6 +14,7 @@ Blofeld {
 	classvar <glideMode;
 	classvar <filterType;
 	classvar <initSoundData;
+	classvar <numInstances = 0;
 
 	var <>deviceID;
 	var <sounds;
@@ -27,10 +28,24 @@ Blofeld {
 		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
 		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
 		filterType = (bypass:0, lp24db:1, lp12db:2, bp24db:3, bp12db:4, hp24db:5, hp12db:6, notch24db:7, notch12db:8, combp:9, combm:10, ppglp: 11);
+
+		Event.addEventType(\blofeld, { |server|
+			currentEnvironment.keys.do({ |key|
+				if (BlofeldParam.byName[key] != nil, {
+					~blofeld.setParam(key, currentEnvironment[key]);
+				});
+			});
+		});
 	}
 
-	*new { |deviceID = 0x00|
-		^super.newCopyArgs(deviceID, (), ());
+	*new { |deviceName, portName, deviceID = 0x00|
+		var instance = super.newCopyArgs(deviceID, (), ());
+		instance.connect(deviceName, portName);
+		if (numInstances == 0, {
+			instance.makeDefault();
+		});
+		numInstances = numInstances + 1;
+		^instance;
 	}
 
 	connect { |deviceName, portName|
@@ -44,6 +59,10 @@ Blofeld {
 		});
 		MIDIIn.addFuncTo(\sysex, {|src, sysex| this.parseSysex(sysex); });
 		midiOut = MIDIOut.newByName(deviceName, portName);
+	}
+
+	makeDefault {
+		Event.addParentType(\blofeld, (blofeld: this));
 	}
 
 	parseSysex { |packet|
