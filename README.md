@@ -3,8 +3,7 @@
 
 ### connect
 ```supercollider
-~blofeld = Blofeld.new();
-~blofeld.connect("Blofeld", "");
+~blofeld = Blofeld.new("Blofeld", ""); // deviceName, portName
 ```
 ### select a random sound
 ```supercollider
@@ -35,15 +34,10 @@ BlofeldParam.byName.keys.postln;
 ```
 ### full example
 ```supercollider
-// 1. selects a random sound sound
-// 2. using Pspawn in parallel:
-// - play a new note from minor scale
-// - change filter 1 resonance to a random value
-// - sets a new target cutoff frequency for filter 1 to animate to
-// 3. animate effect2Mix every second
 (
 ~blofeld = Blofeld.new("Blofeld", "");
-~blofeld.selectSound(1, 90); // B091
+~blofeld.selectSound(1, 90); // select B091 (Clavinetro)
+// request sound information
 ~blofeld.requestSound({
 	~cutoff = ~blofeld.getParam(\filter1Cutoff);
 	p = Ppar([
@@ -51,6 +45,7 @@ BlofeldParam.byName.keys.postln;
 			\method, \par,
 			\pattern, Pfunc {
 				Ppar([
+					// play random notes from Minor scale
 					Pbind(
 						\type, \midi,
 						\midicmd, \noteOn,
@@ -60,6 +55,7 @@ BlofeldParam.byName.keys.postln;
 						\octave, Pwhite(2, 5, inf),
 						\dur, 10,
 					),
+					// change \filter1Resonance and ~cutoff target on every new note
 					Pbind(
 						\type, \blofeld,
 						\filter1Resonance, Pwhite(0, 127, inf),
@@ -77,7 +73,7 @@ BlofeldParam.byName.keys.postln;
 			\filter1Cutoff, Pfunc { |event|
 				var speed = 1/3;
 				var current = ~blofeld.getParam(\filter1Cutoff);
-				current + ((~cutoff - current) * speed);
+				current + ((~cutoff - current) * speed); // animate ~cutoff to target value
 			},
 		),
 		Pbind(
@@ -85,7 +81,7 @@ BlofeldParam.byName.keys.postln;
 			\dur, 1,
 			\effect2Mix, Pfunc {
 				var value = ~blofeld.getParam(\effect2Mix) + 1;
-				if (value > 127, { 0 }, { value });
+				if (value > 127, { 0 }, { value }); // increase click-delay mix every second
 			},
 		),
 	]).play;
