@@ -4,7 +4,9 @@ Blofeld {
 	const waldorfID = 0x3E;
 	const blofeldID = 0x13;
 	const soundRequest = 0x00;
+	const globalRequest = 0x04;
 	const soundDump = 0x10;
+	const globalDump = 0x14;
 	const paramChange = 0x20;
 
 	classvar <bank;
@@ -13,11 +15,13 @@ Blofeld {
 	classvar <arpMode;
 	classvar <glideMode;
 	classvar <filterType;
+	classvar <category;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
 
 	var <>deviceID;
 	var <sounds;
+	var <global;
 	var <callbacks;
 	var <midiOut;
 
@@ -27,19 +31,25 @@ Blofeld {
 		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, rand: 4, sandh: 5);
 		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
 		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
+		category = (init: 0, arp: 1, atmp: 2, bass: 3, drum: 4, fx: 5, keys: 6, lead: 7, mono: 8, pad: 9, perc: 10, poly: 11, seq: 12);
 		filterType = (bypass:0, lp24db:1, lp12db:2, bp24db:3, bp12db:4, hp24db:5, hp12db:6, notch24db:7, notch12db:8, combp:9, combm:10, ppglp: 11);
 
 		Event.addEventType(\blofeld, { |server|
+			var sendGlobal = false;
 			currentEnvironment.keys.do({ |key|
 				if (BlofeldParam.byName[key] != nil, {
 					~blofeld.setParam(key, currentEnvironment[key]);
+					sendGlobal = sendGlobal || BlofeldParam.byName[key].isGlobal;
 				});
+			});
+			if (sendGlobal, {
+				~blofeld.sendGlobal();
 			});
 		});
 	}
 
 	*new { |deviceName, portName, deviceID = 0x00|
-		var instance = super.newCopyArgs(deviceID, (), ());
+		var instance = super.newCopyArgs(deviceID, (), (), ());
 		instance.connect(deviceName, portName);
 		if (numInstances == 0, {
 			instance.makeDefault();
@@ -76,6 +86,13 @@ Blofeld {
 					callbacks[key].value;
 					callbacks.removeAt(key);
 				});
+			},
+			globalDump, {
+				global = packet[5..59];
+				if (callbacks[\global] != nil, {
+					callbacks[\global].value;
+					callbacks.removeAt(\global);
+				});
 			}
 		);
 	}
@@ -108,9 +125,15 @@ Blofeld {
 	}
 
 	selectSound { |bank, program, chan = 0|
-		this.setParam(\bank, bank, chan);
+		this.setBank(bank, chan);
 		this.setProgram(program, chan);
 	}
+
+	// does not work sysex \multBank and \multiSound are readonly
+	// selectMultiSound { |bank, program, chan = 0, sendGlobal = false|
+	// 	this.setGlobalParam(("multiBank"++(chan+1)).asSymbol, bank);
+	// 	this.setGlobalParam(("multiSound"++(chan+1)).asSymbol, program, sendGlobal);
+	// }
 
 	requestSound { |callback = nil, bank = 0x7F, program = 0x00|
 		if (callback != nil, {
@@ -132,6 +155,14 @@ Blofeld {
 		midiOut.sysex(this.soundDumpPacket(sound));
 	}
 
+	setBank { |bank, chan = 0|
+		if (this.multiMode.asBoolean, {
+			this.setControlParam(\bankMSB, bank, chan);
+		}, {
+			this.setControlParam(\bankLSB, bank, chan);
+		});
+	}
+
 	setProgram { |num, chan = 0|
 		midiOut.program(chan, num);
 		sounds.removeAt(this.getKey());
@@ -143,18 +174,64 @@ Blofeld {
 		^value;
 	}
 
-	setParam { |param, value = 0, chan = 0|
+	setParam { |param, value = 0|
 		var bParam = BlofeldParam.byName[param];
 		var sound = this.getSound();
 		value = value.asInteger;
 		if (bParam != nil, {
+			midiOut.sysex(this.paramChangePacket(bParam, value));
+			if (sound != nil, { sound.data[bParam.sysex] = value; });
+		});
+	}
+
+	requestGlobal { |callback = nil|
+		if (callback != nil, {
+			callbacks.put(\global, callback);
+		});
+		midiOut.sysex(this.globalRequestPacket());
+	}
+
+	sendGlobal {
+		midiOut.sysex(this.globalDumpPacket());
+	}
+
+	getGlobalParam { |param|
+		var bParam = BlofeldParam.byName[param];
+		var value = if (bParam != nil && bParam.sysex != nil, { global[bParam.sysex] }, { nil });
+		^value;
+	}
+
+	setGlobalParam { |param, value = 0, sendGlobal = false|
+		var bParam = BlofeldParam.byName[param];
+		value = value.asInteger;
+		if (bParam != nil, {
 			if (bParam.sysex != nil, {
-				midiOut.sysex(this.paramChangePacket(bParam, value));
-				if (sound != nil, { sound.data[bParam.sysex] = value; });
-			}, {
+				global[bParam.sysex] = value;
+				if (sendGlobal, {
+					this.sendGlobal();
+				});
+			});
+		});
+	}
+
+	setControlParam { |param, value, chan = 0|
+		var bParam = BlofeldParam.byName[param];
+		if (bParam != nil, {
+			if (bParam.control != nil, {
+				value = value.asInteger;
 				midiOut.control(chan, bParam.control, value);
 			});
 		});
+	}
+
+	multiMode { |value = nil, sendGlobal = true|
+		var bParam = BlofeldParam.byName[\multiMode];
+		value = if (value != nil, {
+			this.setGlobalParam(\multiMode, value, sendGlobal);
+		}, {
+			global[bParam.sysex];
+		});
+		^value;
 	}
 
 	soundRequestPacket { |bank, program|
@@ -180,7 +257,7 @@ Blofeld {
 		packet = packet.add(sound.bank);
 		packet = packet.add(sound.program);
 		packet = packet.addAll(sound.data);
-		packet = packet.add(sound.checksum);
+		packet = packet.add(this.checksum(sound.data));
 		packet = packet.add(sysexEnd);
 		^packet;
 	}
@@ -198,5 +275,34 @@ Blofeld {
 		packet = packet.add(value);
 		packet = packet.add(sysexEnd);
 		^packet;
+	}
+
+	globalRequestPacket {
+		var packet = Int8Array.new();
+		packet = packet.add(sysexBegin);
+		packet = packet.add(waldorfID);
+		packet = packet.add(blofeldID);
+		packet = packet.add(deviceID);
+		packet = packet.add(globalRequest);
+		packet = packet.add(sysexEnd);
+		^packet;
+	}
+
+	globalDumpPacket {
+		var packet = Int8Array.new();
+		packet = packet.add(sysexBegin);
+		packet = packet.add(waldorfID);
+		packet = packet.add(blofeldID);
+		packet = packet.add(deviceID);
+		packet = packet.add(globalDump);
+		packet = packet.addAll(global);
+		packet = packet.add(this.checksum(global));
+		packet = packet.add(sysexEnd);
+		^packet;
+	}
+
+	checksum { |data|
+		var csum = data.sum & 0x7F;
+		^csum;
 	}
 }

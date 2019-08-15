@@ -44,11 +44,6 @@ BlofeldSound {
 		});
 	}
 
-	checksum {
-		var csum = data.sum & 0x7F;
-		^csum;
-	}
-
 	getParam { |param|
 		var bParam = BlofeldParam.byName[param];
 		var value = if (bParam != nil && bParam.sysex != nil, { data[bParam.sysex] }, { nil });

@@ -9,6 +9,7 @@ BlofeldParam {
 	var <sysex;
 	var <control;
 	var <values;
+	var <isGlobal = false;
 
 	*initClass {
 		params = [
@@ -119,7 +120,7 @@ BlofeldParam {
 			BlofeldParam.new(\effect1Type, 128, nil, (0..127)),
 			BlofeldParam.new(\effect1Mix, 129, 93, (0..127)),
 			BlofeldParam.new(\effect1Param1, 130, nil, (0..127)),
-			BlofeldParam.new(\effect1Param2, nil, (0..127)),
+			BlofeldParam.new(\effect1Param2, 131, nil, (0..127)),
 			BlofeldParam.new(\effect1Param3, 132, nil, (0..127)),
 			BlofeldParam.new(\effect1Param4, 133, nil, (0..127)),
 			BlofeldParam.new(\effect1Param5, 134, nil, (0..127)),
@@ -254,11 +255,64 @@ BlofeldParam {
 			BlofeldParam.new(\arpClock, 314, nil, (0..42)),
 			BlofeldParam.new(\arpLength, 315, 13, (0..43)),
 			BlofeldParam.new(\arpOctave, 316, 12, (0..9)),
-			// control
-			BlofeldParam.new(\volume, nil, 7, (0..127)),
+
+			// global data
+			BlofeldGlobal.new(\multiMode, 1, nil, (0..1)),
+			BlofeldGlobal.new(\multiBank1, 2, nil, (0..7)), // these seem to be read-only
+			BlofeldGlobal.new(\multiSound1, 3, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank2, 4, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound2, 5, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank3, 6, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound3, 7, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank4, 8, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound4, 9, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank5, 10, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound5, 11, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank6, 12, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound6, 13, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank7, 14, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound7, 15, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank8, 16, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound8, 17, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank9, 18, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound9, 19, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank10, 20, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound10, 21, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank11, 22, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound11, 23, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank12, 24, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound12, 25, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank13, 26, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound13, 27, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank14, 28, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound14, 29, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank15, 30, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound15, 31, nil, (0..127)),
+			BlofeldGlobal.new(\multiBank16, 32, nil, (0..7)),
+			BlofeldGlobal.new(\multiSound16, 33, nil, (0..127)),
+			BlofeldGlobal.new(\autoEdit, 35, nil, (0..1)),
+			BlofeldGlobal.new(\midiChannel, 36, nil, (0..16)), // omni..16
+			BlofeldGlobal.new(\deviceID, 37, nil, (0..126)),
+			BlofeldGlobal.new(\popupTime, 38, nil, (1..127)), // 0.1s..15.5s
+			BlofeldGlobal.new(\contrast, 39, nil, (0..127)),
+			BlofeldGlobal.new(\masterTune, 40, nil, (54..74)), // 430..450
+			BlofeldGlobal.new(\transpose, 41, nil, (52..76)), // -12..+12
+			BlofeldGlobal.new(\ctrlSend, 44, nil, (0..3)),
+			BlofeldGlobal.new(\ctrlReceive, 45, nil, (0..1)),
+			BlofeldGlobal.new(\clock, 48, nil, (0..1)), // auto, internal
+			BlofeldGlobal.new(\velCurve, 50, nil, (0..8)), // linear..fix
+			BlofeldGlobal.new(\controlW, 51, nil, (0..120)),
+			BlofeldGlobal.new(\controlX, 52, nil, (0..120)),
+			BlofeldGlobal.new(\controlY, 53, nil, (0..120)),
+			BlofeldGlobal.new(\controlZ, 54, nil, (0..120)),
+			BlofeldGlobal.new(\volume, 55, 7, (0..127)),
+			BlofeldGlobal.new(\catFilter, 56, nil, (0..13)),
+
+			// control only
+			BlofeldParam.new(\bankMSB, nil, 0, (0..127)), //
 			BlofeldParam.new(\pan, nil, 10, (0..127)),
 			BlofeldParam.new(\expression, nil, 11, (0..127)),
-			BlofeldParam.new(\bank, nil, 32, (0..7)), // (a...h)
+			BlofeldParam.new(\bankLSB, nil, 32, (0..7)), // (a...h)
 			BlofeldParam.new(\pitchmod, nil, 50, (0..127)),
 			BlofeldParam.new(\sustainPedal, nil, 64, (0..127)),
 			BlofeldParam.new(\sustenuto, nil, 66, (0..127)),
@@ -266,10 +320,11 @@ BlofeldParam {
 			BlofeldParam.new(\resetAllControllers, nil, 121, [0]),
 			BlofeldParam.new(\localControl, nil, 122, (0..127)),
 			BlofeldParam.new(\allNotesOff, nil, 123, [0]),
-			BlofeldParam.new(\omniModeOff, nil, 124, [0]),
-			BlofeldParam.new(\omniModeOn, nil, 125, [0]),
-			BlofeldParam.new(\polyModeOff, nil, 126, [0]), // 0
-			BlofeldParam.new(\polyModeOn, nil, 127, [0]),
+			// does not seem to be working:
+			// BlofeldParam.new(\omniModeOff, nil, 124, [0]),
+			// BlofeldParam.new(\omniModeOn, nil, 125, [0]),
+			// BlofeldParam.new(\polyModeOff, nil, 126, [0]), // 0
+			// BlofeldParam.new(\polyModeOn, nil, 127, [0]),
 		];
 		this.initGroups();
 	}
@@ -309,5 +364,11 @@ BlofeldParam {
 
 	asString {
 		^name;
+	}
+}
+
+BlofeldGlobal : BlofeldParam {
+	*new { |name, sysex, control, values|
+		^super.newCopyArgs(name, sysex, control, values, true);
 	}
 }
