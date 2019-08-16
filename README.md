@@ -43,26 +43,20 @@ BlofeldParam.byName.keys.postln;
 		Pspawn(Pbind(
 			\method, \par,
 			\pattern, Pfunc {
-				Ppar([
-					// play random notes from Minor scale
-					Pbind(
-						\type, \midi,
-						\midicmd, \noteOn,
-						\midiout, ~blofeld.midiOut,
-						\scale, Scale.minor,
-						\degree, Prand(Scale.minor.degrees, inf),
-						\octave, Pwhite(2, 5, inf),
-						\dur, 10,
-					),
-					// change \filter1Resonance and ~cutoff target on every new note
-					Pbind(
-						\type, \blofeld,
-						\filter1Resonance, Pwhite(0, 127, inf),
-						\setCutoff, Pfunc {
-							~cutoff = rrand(0, 127);
-						}
-					),
-				]);
+				// play random notes from Minor scale
+				// change \filter1Resonance and ~cutoff target on every new note
+				Pbind(
+					\type, \blofeld,
+					\midicmd, \noteOn,
+					\scale, Scale.minor,
+					\degree, Prand(Scale.minor.degrees, inf),
+					\octave, Pwhite(2, 5, inf),
+					\dur, 10,
+					\filter1Resonance, Pwhite(0, 96, inf),
+					\setCutoff, Pfunc {
+						~cutoff = rrand(0, 127);
+					},
+				);
 			},
 			\delta, Pwhite(32, 128, inf)
 		)),
