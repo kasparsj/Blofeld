@@ -37,9 +37,14 @@ Blofeld {
 		Event.addEventType(\blofeld, { |server|
 			var sendGlobal = false;
 			currentEnvironment.keys.do({ |key|
-				if (BlofeldParam.byName[key] != nil, {
-					~blofeld.setParam(key, currentEnvironment[key]);
-					sendGlobal = sendGlobal || BlofeldParam.byName[key].isGlobal;
+				var bParam = BlofeldParam.byName[key];
+				if (bParam != nil, {
+					if (bParam.isGlobal, {
+						~blofeld.setGlobalParam(key, currentEnvironment[key]);
+						sendGlobal = true;
+					}, {
+						~blofeld.setParam(key, currentEnvironment[key], if (~chan == nil, { 0 }, { ~chan }));
+					});
 				});
 			});
 			if (sendGlobal, {
@@ -48,8 +53,8 @@ Blofeld {
 		});
 	}
 
-	*new { |deviceName, portName, deviceID = 0x00|
-		var instance = super.newCopyArgs(deviceID, (), (), ());
+	*new { |deviceName, portName, deviceID = 0|
+		var instance = super.newCopyArgs(deviceID, (), Int8Array.new, ());
 		instance.connect(deviceName, portName);
 		if (numInstances == 0, {
 			instance.makeDefault();
@@ -88,7 +93,7 @@ Blofeld {
 				});
 			},
 			globalDump, {
-				global = packet[5..59];
+				global = packet[5..76];
 				if (callbacks[\global] != nil, {
 					callbacks[\global].value;
 					callbacks.removeAt(\global);
@@ -156,11 +161,10 @@ Blofeld {
 	}
 
 	setBank { |bank, chan = 0|
-		if (this.multiMode.asBoolean, {
-			this.setControlParam(\bankMSB, bank, chan);
-		}, {
-			this.setControlParam(\bankLSB, bank, chan);
-		});
+		this.setControlParam(\bankLSB, bank, chan);
+		//if (this.multiMode.asBoolean, {
+		//	this.setControlParam(\bankMSB, 127, chan);
+		//});
 	}
 
 	setProgram { |num, chan = 0|
@@ -174,12 +178,12 @@ Blofeld {
 		^value;
 	}
 
-	setParam { |param, value = 0|
+	setParam { |param, value = 0, location = 0|
 		var bParam = BlofeldParam.byName[param];
 		var sound = this.getSound();
 		value = value.asInteger;
 		if (bParam != nil, {
-			midiOut.sysex(this.paramChangePacket(bParam, value));
+			midiOut.sysex(this.paramChangePacket(bParam, value, location));
 			if (sound != nil, { sound.data[bParam.sysex] = value; });
 		});
 	}
@@ -204,30 +208,26 @@ Blofeld {
 	setGlobalParam { |param, value = 0, sendGlobal = false|
 		var bParam = BlofeldParam.byName[param];
 		value = value.asInteger;
-		if (bParam != nil, {
-			if (bParam.sysex != nil, {
-				global[bParam.sysex] = value;
-				if (sendGlobal, {
-					this.sendGlobal();
-				});
+		if (bParam != nil && bParam.sysex != nil, {
+			global[bParam.sysex] = value;
+			if (sendGlobal, {
+				this.sendGlobal();
 			});
 		});
 	}
 
 	setControlParam { |param, value, chan = 0|
 		var bParam = BlofeldParam.byName[param];
-		if (bParam != nil, {
-			if (bParam.control != nil, {
-				value = value.asInteger;
-				midiOut.control(chan, bParam.control, value);
-			});
+		if (bParam != nil && bParam.control != nil, {
+			midiOut.control(chan, bParam.control, value.asInteger);
 		});
 	}
 
 	multiMode { |value = nil, sendGlobal = true|
 		var bParam = BlofeldParam.byName[\multiMode];
 		value = if (value != nil, {
-			this.setGlobalParam(\multiMode, value, sendGlobal);
+			//this.setGlobalParam(\multiMode, value, sendGlobal);
+			Error("Multimode needs to be switched on manually").throw;
 		}, {
 			global[bParam.sysex];
 		});
@@ -262,7 +262,7 @@ Blofeld {
 		^packet;
 	}
 
-	paramChangePacket { |param, value, location = 0x00|
+	paramChangePacket { |param, value, location = 0|
 		var packet = Int8Array.new();
 		packet = packet.add(sysexBegin);
 		packet = packet.add(waldorfID);
