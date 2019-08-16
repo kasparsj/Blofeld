@@ -16,6 +16,7 @@ Blofeld {
 	classvar <glideMode;
 	classvar <filterType;
 	classvar <category;
+	classvar <effect;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
 
@@ -422,6 +423,17 @@ Blofeld {
 			combp:9,
 			combm:10,
 			ppglp: 11,
+		);
+		effect = (
+			bypass: 0,
+			chorus: 1,
+			flanger: 2,
+			phaser: 3,
+			overdrive: 4,
+			tripleFX: 5,
+			delay: 6,
+			clkDelay: 7,
+			reverb: 8,
 		);
 	}
 }
