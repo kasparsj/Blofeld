@@ -246,18 +246,19 @@ Blofeld {
 	}
 
 	sendWavetable { |slot, signal, name|
+		var mult = 1;
 		if (slot < 80 || slot > 118, {
 			Error("Slot must be between 80 and 118.").throw;
 		});
-		if (signal.size != (128*64), {
+		if ((signal.size % (128*64)) != 0, {
 			Error("Signal must have 128*64 samples").throw;
 		});
 		if (name.size > 14, {
 			Error("Name must be less than 14 ASCII characters long.").throw;
 		});
-		signal.scale(1048575);
+		mult = (signal.size / (128*64)).asInteger;
 		64.do({ |i|
-			midiOut.sysex(this.wavetableDumpPacket(slot, signal[(128*i)..(128*(i+1)-1)], name.ascii, i));
+			midiOut.sysex(this.wavetableDumpPacket(slot, signal[(128*i*mult)..(128*(i+1)*mult-1)], name.ascii, mult, i));
 		});
 	}
 
@@ -328,18 +329,18 @@ Blofeld {
 		^packet;
 	}
 
-	wavetableDumpPacket { |slot, samples, ascii, wave|
+	wavetableDumpPacket { |slot, samples, ascii, mult, wave|
 		var packet = Int8Array.new();
 		packet = packet.add(sysexBegin);
 		packet = packet.add(waldorfID);
 		packet = packet.add(blofeldID);
 		packet = packet.add(deviceID);
 		packet = packet.add(wavetableDump);
-		packet = packet.add(0x50 + slot - 80);
+		packet = packet.add(0x50 + (slot - 80));
 		packet = packet.add(wave & 0x7F);
 		packet = packet.add(0x00); // format
-		samples.do({ |sample|
-			sample = sample.asInteger;
+		128.do({ |i|
+			var sample = (samples[i*mult] * 1048575).asInteger;
 			packet = packet.add((sample >> 14) & 0x7f);
 			packet = packet.add((sample >> 7) & 0x7f);
 			packet = packet.add((sample) & 0x7f);
