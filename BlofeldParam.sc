@@ -49,7 +49,7 @@ BlofeldParam {
 			BlofeldParam.new(\osc3Keytrack, 37, nil, (0..127)),
 			BlofeldParam.new(\osc3FMSource, 38, nil, (0..11)),
 			BlofeldParam.new(\osc3FM, 39, 45, (0..127)),
-			BlofeldParam.new(\osc3Shape, 40, 46, (0..72)),
+			BlofeldParam.new(\osc3Shape, 40, 46, (0..4)), // only supports basic shapes
 			BlofeldParam.new(\osc3PW, 41, 47, (0..127)),
 			BlofeldParam.new(\osc3PWMSource, 42, nil, (0..30)),
 			BlofeldParam.new(\osc3PWMAmount, 43, 48, (0..127)),

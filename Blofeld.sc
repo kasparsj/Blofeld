@@ -11,6 +11,7 @@ Blofeld {
 
 	classvar <bank;
 	classvar <shape;
+	classvar <sineShape;
 	classvar <lfoShape;
 	classvar <arpMode;
 	classvar <glideMode;
@@ -26,13 +27,7 @@ Blofeld {
 	var <midiOut;
 
 	*initClass {
-		bank = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6, h: 7);
-		shape = (pulse: 0, saw: 1, triangle: 2, sine: 3, alt1: 4, alt2: 5, resonant: 6, resonant2: 7);
-		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, rand: 4, sandh: 5);
-		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
-		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
-		category = (init: 0, arp: 1, atmp: 2, bass: 3, drum: 4, fx: 5, keys: 6, lead: 7, mono: 8, pad: 9, perc: 10, poly: 11, seq: 12);
-		filterType = (bypass:0, lp24db:1, lp12db:2, bp24db:3, bp12db:4, hp24db:5, hp12db:6, notch24db:7, notch12db:8, combp:9, combm:10, ppglp: 11);
+		this.initDictionaries();
 
 		Event.addEventType(\blofeld, { |server|
 			var sendGlobal = false;
@@ -49,6 +44,10 @@ Blofeld {
 			});
 			if (sendGlobal, {
 				~blofeld.sendGlobal();
+			});
+			if  (~midicmd != nil, {
+				if (~midiout == nil, { ~midiout = ~blofeld.midiOut; });
+				~eventTypes[\midi].value(server);
 			});
 		});
 	}
@@ -314,5 +313,120 @@ Blofeld {
 	checksum { |data|
 		var csum = data.sum & 0x7F;
 		^csum;
+	}
+
+	*initDictionaries {
+		bank = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6, h: 7);
+		shape = (
+			off: 0,
+			pulse: 1,
+			saw: 2,
+			triangle: 3,
+			sine: 4,
+			alt1: 5,
+			alt2: 6,
+			resonant: 7,
+			resonant2: 8,
+			malletSyn: 9,
+			sqrSweep: 10,
+			bellish: 11,
+			pulSweep: 12,
+			sawSweep: 13,
+			mellowSaw: 14,
+			feedback: 15,
+			addHarm: 16,
+			reso3HP: 17,
+			windSyn: 18,
+			highHarm: 19,
+			clipper: 20,
+			organSyn: 21,
+			squareSaw: 22,
+			formant1: 23,
+			polated: 24,
+			transient: 25,
+			electricP: 26,
+			robotic: 27,
+			strongHrm: 28,
+			percOrgan: 29,
+			clipSweep: 30,
+			resoHarms: 31,
+			twoEchos: 32,
+			formant2: 33,
+			fmntVocal: 34,
+			microSync: 35,
+			microPWM: 36,
+			glassy: 37,
+			squareHP: 38,
+			sawSync1: 39,
+			sawSync2: 40,
+			sawSync3: 41,
+			pulSync1: 42,
+			pulSync2: 43,
+			pulSync3: 44,
+			sinSync1: 45,
+			sinSync2: 46,
+			sinSync3: 47,
+			pwmPulse: 48,
+			pwmSaw: 49,
+			fuzzWave: 50,
+			distorted: 51,
+			heavyFuzz: 52,
+			fuzzSynv: 53,
+			kStrong1: 54,
+			kStrong2: 55,
+			kStrong3: 56,
+			oneDashFive:57,
+			nineteenTwenty: 58,
+			waveTrip1: 59,
+			waveTrip2: 60,
+			waveTrip3: 61,
+			waveTrip4: 62,
+			maleVoice: 63,
+			lowPiano: 64,
+			resoSweep: 65,
+			xmasBell: 66,
+			fmPiano: 67,
+			fatOrgan: 68,
+			vibes: 69,
+			chorus2: 70,
+			truePWM: 71,
+			upperWaves: 72,
+		);
+		sineShape = ();
+		[\sine, \sinSync1, \sinSync2, \sinSync3].do({ |k|
+			sineShape.put(k, shape[k]);
+		});
+		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, rand: 4, sandh: 5);
+		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
+		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
+		category = (
+			init: 0,
+			arp: 1,
+			atmp: 2,
+			bass: 3,
+			drum: 4,
+			fx: 5,
+			keys: 6,
+			lead: 7,
+			mono: 8,
+			pad: 9,
+			perc: 10,
+			poly: 11,
+			seq: 12,
+		);
+		filterType = (
+			bypass:0,
+			lp24db:1,
+			lp12db:2,
+			bp24db:3,
+			bp12db:4,
+			hp24db:5,
+			hp12db:6,
+			notch24db:7,
+			notch12db:8,
+			combp:9,
+			combm:10,
+			ppglp: 11,
+		);
 	}
 }
