@@ -17,6 +17,7 @@ Blofeld {
 	classvar <filterType;
 	classvar <category;
 	classvar <effect;
+	classvar <fmSource;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
 
@@ -392,7 +393,7 @@ Blofeld {
 			truePWM: 71,
 			upperWaves: 72,
 		);
-		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, rand: 4, sandh: 5);
+		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, random: 4, sandh: 5);
 		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
 		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
 		category = (
@@ -434,6 +435,20 @@ Blofeld {
 			delay: 6,
 			clkDelay: 7,
 			reverb: 8,
+		);
+		fmSource = (
+			off: 0,
+			osc1: 1,
+			osc2: 2,
+			osc3: 3,
+			noise: 4,
+			lfo1: 5,
+			lfo2: 6,
+			lfo3: 7,
+			filterEnv: 8,
+			ampEnv: 9,
+			env3: 10,
+			env4: 11,
 		);
 	}
 }
