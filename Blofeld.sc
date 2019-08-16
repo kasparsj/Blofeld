@@ -6,6 +6,7 @@ Blofeld {
 	const soundRequest = 0x00;
 	const globalRequest = 0x04;
 	const soundDump = 0x10;
+	const wavetableDump = 0x12;
 	const globalDump = 0x14;
 	const paramChange = 0x20;
 
@@ -244,6 +245,22 @@ Blofeld {
 		^value;
 	}
 
+	sendWavetable { |slot, signal, name|
+		if (slot < 80 || slot > 118, {
+			Error("Slot must be between 80 and 118.").throw;
+		});
+		if (signal.size != (128*64), {
+			Error("Signal must have 128*64 samples").throw;
+		});
+		if (name.size > 14, {
+			Error("Name must be less than 14 ASCII characters long.").throw;
+		});
+		signal.scale(1048575);
+		64.do({ |i|
+			midiOut.sysex(this.wavetableDumpPacket(slot, signal[(128*i)..(128*(i+1)-1)], name.ascii, i));
+		});
+	}
+
 	soundRequestPacket { |bank, program|
 		var packet = Int8Array.new();
 		packet = packet.add(sysexBegin);
@@ -307,6 +324,33 @@ Blofeld {
 		packet = packet.add(globalDump);
 		packet = packet.addAll(global);
 		packet = packet.add(this.checksum(global));
+		packet = packet.add(sysexEnd);
+		^packet;
+	}
+
+	wavetableDumpPacket { |slot, samples, ascii, wave|
+		var packet = Int8Array.new();
+		packet = packet.add(sysexBegin);
+		packet = packet.add(waldorfID);
+		packet = packet.add(blofeldID);
+		packet = packet.add(deviceID);
+		packet = packet.add(wavetableDump);
+		packet = packet.add(0x50 + slot - 80);
+		packet = packet.add(wave & 0x7F);
+		packet = packet.add(0x00); // format
+		samples.do({ |sample|
+			sample = sample.asInteger;
+			packet = packet.add((sample >> 14) & 0x7f);
+			packet = packet.add((sample >> 7) & 0x7f);
+			packet = packet.add((sample) & 0x7f);
+		});
+		14.do({ |i|
+			var char = if(ascii[i] != nil, { ascii[i] & 0x7f }, { 0x00 });
+			packet = packet.add(char);
+		});
+		packet = packet.add(0x00); // reserved
+		packet = packet.add(0x00); // reserved
+		packet = packet.add(this.checksum(packet[7..407]));
 		packet = packet.add(sysexEnd);
 		^packet;
 	}
@@ -392,6 +436,20 @@ Blofeld {
 			chorus2: 70,
 			truePWM: 71,
 			upperWaves: 72,
+			user1: 86,
+			user2: 87,
+			user3: 88,
+			user4: 89,
+			user5: 90,
+			user6: 91,
+			user7: 92,
+			user8: 93,
+			user9: 94,
+			user10: 95,
+			user11: 96,
+			user12: 97,
+			user13: 98,
+			user14: 99,
 		);
 		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, random: 4, sandh: 5);
 		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
