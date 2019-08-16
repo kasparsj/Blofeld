@@ -11,7 +11,6 @@ Blofeld {
 
 	classvar <bank;
 	classvar <shape;
-	classvar <sineShape;
 	classvar <lfoShape;
 	classvar <arpMode;
 	classvar <glideMode;
@@ -392,10 +391,6 @@ Blofeld {
 			truePWM: 71,
 			upperWaves: 72,
 		);
-		sineShape = ();
-		[\sine, \sinSync1, \sinSync2, \sinSync3].do({ |k|
-			sineShape.put(k, shape[k]);
-		});
 		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, rand: 4, sandh: 5);
 		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
 		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
