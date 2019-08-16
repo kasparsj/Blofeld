@@ -234,6 +234,16 @@ Blofeld {
 		^value;
 	}
 
+	catFilter { |value = nil, sendGlobal = true|
+		var bParam = BlofeldParam.byName[\catFilter];
+		value = if (value != nil, {
+			this.setGlobalParam(\catFilter, value+1, sendGlobal);
+		}, {
+			global[bParam.sysex];
+		});
+		^value;
+	}
+
 	soundRequestPacket { |bank, program|
 		var packet = Int8Array.new();
 		packet = packet.add(sysexBegin);
