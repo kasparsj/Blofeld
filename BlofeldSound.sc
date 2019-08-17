@@ -59,4 +59,13 @@ BlofeldSound {
 		});
 		^value;
 	}
+
+	printParams {
+		data.do { |value, sysex|
+			var bParam = BlofeldParam.paramSysex[sysex];
+			if ((bParam != nil) && (data[sysex] != 0), {
+				(bParam.name.asString + value).postln;
+			});
+		};
+	}
 }

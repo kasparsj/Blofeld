@@ -1,7 +1,8 @@
 BlofeldParam {
 	classvar <params;
 	classvar <byName;
-	classvar <bySysex;
+	classvar <paramSysex;
+	classvar <globalSysex;
 	classvar <byControl;
 	classvar <groups;
 
@@ -331,19 +332,24 @@ BlofeldParam {
 
 	*initGroups {
 		byName = ();
-		bySysex = ();
+		paramSysex = ();
+		globalSysex = ();
 		byControl = ();
 		params.do({ |value|
 			byName.put(value.name, value);
 			if (value.sysex != nil, {
-				bySysex.put(value.sysex, value);
+				if (value.isGlobal, {
+					globalSysex.put(value.sysex, value);
+				}, {
+					paramSysex.put(value.sysex, value);
+				});
 			});
 			if (value.control != nil, {
 				byControl.put(value.control, value);
 			});
 		});
 		groups = (
-			\sysex: bySysex.values,
+			\sysex: paramSysex.values ++ globalSysex.values,
 			\control: byControl.values,
 			\osc1: params[0..12],
 			\osc2: params[13..25],

@@ -93,9 +93,10 @@ Blofeld {
 				var bank = packet[5];
 				var program = packet[6];
 				var key = this.getKey(bank, program);
-				this.getOrCreateSound(bank, program).data = packet[7..389];
+				var sound = this.getOrCreateSound(bank, program);
+				sound.data = packet[7..389];
 				if (callbacks[key] != nil, {
-					callbacks[key].value;
+					callbacks[key].value(sound);
 					callbacks.removeAt(key);
 				});
 			},
