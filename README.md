@@ -3,7 +3,8 @@
 
 ### connect
 ```supercollider
-// it's much better to use MIDI in port instead of USB
+// it's much better to use Blofeld's MIDIIn port for SuperColler's MIDIOut, instead of USB
+// but since Blofeld does not have a MIDIOut port, you'll need to also connect the USB cable to be able to receive sysex messages
 ~blofeld = Blofeld.new("Blofeld", ""); // deviceName, portName
 ```
 ### select a random sound
