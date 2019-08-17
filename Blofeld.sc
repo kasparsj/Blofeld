@@ -182,7 +182,7 @@ Blofeld {
 	setParam { |param, value = 0, location = 0|
 		var bParam = BlofeldParam.byName[param];
 		var sound = this.getSound();
-		value = value.asInteger;
+		value = value.asInteger.min(127).max(0);
 		if (bParam != nil, {
 			midiOut.sysex(this.paramChangePacket(bParam, value, location));
 			if (sound != nil, { sound.data[bParam.sysex] = value; });
@@ -208,7 +208,7 @@ Blofeld {
 
 	setGlobalParam { |param, value = 0, sendGlobal = false|
 		var bParam = BlofeldParam.byName[param];
-		value = value.asInteger;
+		value = value.asInteger.min(127).max(0);
 		if (bParam != nil && bParam.sysex != nil, {
 			global[bParam.sysex] = value;
 			if (sendGlobal, {
@@ -220,7 +220,7 @@ Blofeld {
 	setControlParam { |param, value, chan = 0|
 		var bParam = BlofeldParam.byName[param];
 		if (bParam != nil && bParam.control != nil, {
-			midiOut.control(chan, bParam.control, value.asInteger);
+			midiOut.control(chan, bParam.control, value.asInteger.min(127).max(0));
 		});
 	}
 
@@ -245,37 +245,37 @@ Blofeld {
 		^value;
 	}
 
-	sendWavetable { |slot, wavetable, name|
+	sendWavetable { |slot, signal, name|
 		var mult = 1;
 		if (slot < 80 || slot > 118, {
 			Error("Slot must be between 80 and 118.").throw;
 		});
-		if ((wavetable.size % (128*64)) != 0, {
-			Error("Wavetable must have multitude of 128*64 samples").throw;
+		if ((signal.size % 128) != 0, {
+			Error("Signal must have multitude of power of 2 of 128 samples").throw;
+		}, {
+			if (signal.size < (128*64), {
+				var div = signal.size / 128;
+				var times = 6;
+				while ({ div % 2 == 0 }, {
+					div = div / 2;
+					times = times - 1;
+				});
+				if (div != 1, {
+					Error("Signal must have multitude of power of 2 of 128 samples").throw;
+				});
+				times.do {
+					signal = signal ++ signal;
+				};
+			}, {
+				mult = (signal.size / (128*64)).asInteger;
+			});
 		});
 		if (name.size > 14, {
 			Error("Name must be less than 14 ASCII characters long.").throw;
 		});
-		mult = (wavetable.size / (128*64)).asInteger;
 		64.do({ |i|
-			midiOut.sysex(this.wavetableDumpPacket(slot, wavetable[(128*i*mult)..(128*(i+1)*mult-1)], name.ascii, i, mult));
+			midiOut.sysex(this.wavetableDumpPacket(slot, signal[(128*i*mult)..(128*(i+1)*mult-1)], name.ascii, i, mult));
 		});
-	}
-
-	prepareWavetable { |signal, coef = 0.9|
-		^this.leakDC(signal).normalize;
-	}
-
-	leakDC { |signal, coef = 0.9|
-		var leakDC = signal.copy;
-		var prevValue = 0;
-		var prevDC = 0;
-		leakDC.do({ |value, i|
-			leakDC[i] = value - prevValue + (coef * prevDC);
-			prevValue = value;
-			prevDC = leakDC[i];
-		});
-		^leakDC;
 	}
 
 	soundRequestPacket { |bank, program|
@@ -357,9 +357,16 @@ Blofeld {
 		packet = packet.add(0x00); // format
 		128.do({ |i|
 			var sample = (samples[i*mult] * 1048575).asInteger;
-			packet = packet.add((sample >> 14) & 0x7f);
-			packet = packet.add((sample >> 7) & 0x7f);
-			packet = packet.add((sample) & 0x7f);
+			// packet = packet.add((sample >> 14) & 0x7f);
+			// packet = packet.add((sample >> 7) & 0x7f);
+			// packet = packet.add((sample) & 0x7f);
+			if (sample < 0, {
+				packet = packet.add((sample & 0x000FC000) >> 14 + 0x40);
+				}, {
+					packet = packet.add((sample & 0x000FC000) >> 14);
+			});
+			packet = packet.add((sample & 0x00003F80) >> 7);
+			packet = packet.add((sample & 0x0000007F));
 		});
 		14.do({ |i|
 			var char = if(ascii[i] != nil, { ascii[i] & 0x7f }, { 0x00 });
