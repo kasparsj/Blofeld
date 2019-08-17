@@ -3,6 +3,7 @@
 
 ### connect
 ```supercollider
+// it's much better to use MIDI in port instead of USB
 ~blofeld = Blofeld.new("Blofeld", ""); // deviceName, portName
 ```
 ### select a random sound
