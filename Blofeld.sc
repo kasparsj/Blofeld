@@ -9,7 +9,7 @@ Blofeld {
 	const wavetableDump = 0x12;
 	const globalDump = 0x14;
 	const paramChange = 0x20;
-	const editBuffer = 0x7F;
+	const <editBuffer = 0x7F;
 
 	classvar <bank;
 	classvar <shape;
@@ -59,9 +59,8 @@ Blofeld {
 		});
 	}
 
-	*new { |deviceName, portName, deviceID = 0|
+	*new { |deviceID = 0|
 		var instance = super.newCopyArgs(deviceID, (), Int8Array.new, ());
-		instance.connect(deviceName, portName);
 		if (numInstances == 0, {
 			instance.makeDefault();
 		});
@@ -69,8 +68,8 @@ Blofeld {
 		^instance;
 	}
 
-	connect { |deviceName, portName|
-		if (MIDIClient.initialized == false, {
+	connect { |deviceName, portName, forceInit = false|
+		if (MIDIClient.initialized == false || forceInit, {
 			MIDIClient.init;
 		});
 		MIDIClient.sources.do({|endpoint, i|
@@ -155,8 +154,7 @@ Blofeld {
 	}
 
 	initSound { |bank = 0x7F, program = 0x00|
-		var sound = this.getOrCreateSound(bank, program);
-		sound.init();
+		var sound = this.createSound(bank, program);
 		midiOut.sysex(this.soundDumpPacket(sound));
 	}
 
@@ -187,6 +185,7 @@ Blofeld {
 	setParam { |param, value = 0, location = 0, useCache = false|
 		var bParam = BlofeldParam.byName[param];
 		var sound = this.getSound(editBuffer, location);
+		var sendValue = useCache.not;
 		if (bParam == nil, {
 			Error("Invalid param %".format(param)).throw;
 		});
@@ -194,7 +193,8 @@ Blofeld {
 			Error("For global or control params use setGlobalParam or setControlParam").throw;
 		});
 		value = value.asInteger.min(127).max(0);
-		if (useCache.not || sound == nil || sound.data[bParam.sysex] != value, {
+		sendValue = (sendValue || if (sound == nil, { true }, { sound.data[bParam.sysex] != value }));
+		if (sendValue, {
 			if (bParam.control != nil, {
 				midiOut.control(location, bParam.control, value);
 			}, {

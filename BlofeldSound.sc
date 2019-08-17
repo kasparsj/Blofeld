@@ -29,11 +29,11 @@ BlofeldSound {
 	}
 
 	*new { |bank, program, data = nil|
-		^super.newCopyArgs(bank, program, if (data == nil, { initData }, { data }));
+		^super.newCopyArgs(bank, program, if (data == nil, { initData.copy }, { data }));
 	}
 
 	init {
-		data = initData;
+		data = initData.copy;
 	}
 
 	randomize { |group = \sysex|
