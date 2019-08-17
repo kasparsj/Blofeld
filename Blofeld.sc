@@ -72,11 +72,12 @@ Blofeld {
 		if (MIDIClient.initialized == false || forceInit, {
 			MIDIClient.init;
 		});
-		MIDIClient.sources.do({|endpoint, i|
-			if (endpoint.device == deviceName && endpoint.name == portName, {
-				MIDIIn.connect(i, endpoint);
-			});
-		});
+		// MIDIClient.sources.do({|endpoint, i|
+		// 	if (endpoint.device == deviceName && endpoint.name == portName, {
+		// 		MIDIIn.connect(i, endpoint);
+		// 	});
+		// });
+		MIDIIn.connectAll;
 		MIDIIn.addFuncTo(\sysex, {|src, sysex| this.parseSysex(sysex); });
 		midiOut = MIDIOut.newByName(deviceName, portName);
 	}
