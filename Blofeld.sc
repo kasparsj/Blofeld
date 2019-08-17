@@ -9,6 +9,7 @@ Blofeld {
 	const wavetableDump = 0x12;
 	const globalDump = 0x14;
 	const paramChange = 0x20;
+	const editBuffer = 0x7F;
 
 	classvar <bank;
 	classvar <shape;
@@ -42,7 +43,9 @@ Blofeld {
 						~blofeld.setGlobalParam(key, currentEnvironment[key]);
 						sendGlobal = true;
 					}, {
-						~blofeld.setParam(key, currentEnvironment[key], if (~chan == nil, { 0 }, { ~chan }));
+						var chan = if (~chan == nil, { 0 }, { ~chan });
+						var useCache = if (~useCache == nil, { true }, { ~useCache });
+						~blofeld.setParam(key, currentEnvironment[key], chan, useCache);
 					});
 				});
 			});
@@ -109,14 +112,20 @@ Blofeld {
 		var key = this.getKey(bank, program);
 		var sound = sounds[key];
 		if (sound == nil, {
-			sound = BlofeldSound.new(bank, program);
-			sounds.put(key, sound);
+			sound = this.createSound(bank, program);
 		});
 		^sound;
 	}
 
 	getSound { |bank = 0x7F, program = 0x00|
 		^sounds[this.getKey(bank, program)];
+	}
+
+	createSound { |bank = 0x7F, program = 0x00|
+		var key = this.getKey(bank, program);
+		var sound = BlofeldSound.new(bank, program);
+		sounds.put(key, sound);
+		^sound;
 	}
 
 	getKey { |bank = 0x7F, program = 0x00|
@@ -136,12 +145,6 @@ Blofeld {
 		this.setBank(bank, chan);
 		this.setProgram(program, chan);
 	}
-
-	// does not work sysex \multBank and \multiSound are readonly
-	// selectMultiSound { |bank, program, chan = 0, sendGlobal = false|
-	// 	this.setGlobalParam(("multiBank"++(chan+1)).asSymbol, bank);
-	// 	this.setGlobalParam(("multiSound"++(chan+1)).asSymbol, program, sendGlobal);
-	// }
 
 	requestSound { |callback = nil, bank = 0x7F, program = 0x00|
 		if (callback != nil, {
@@ -175,19 +178,35 @@ Blofeld {
 		sounds.removeAt(this.getKey());
 	}
 
-	getParam { |param|
-		var sound = this.getSound();
+	getParam { |param, location = 0|
+		var sound = this.getSound(editBuffer, location);
 		var value = if (sound != nil, { sound.getParam(param) }, { nil });
 		^value;
 	}
 
-	setParam { |param, value = 0, location = 0|
+	setParam { |param, value = 0, location = 0, useCache = false|
 		var bParam = BlofeldParam.byName[param];
-		var sound = this.getSound();
+		var sound = this.getSound(editBuffer, location);
+		if (bParam == nil, {
+			Error("Invalid param %".format(param)).throw;
+		});
+		if (bParam.sysex == nil, {
+			Error("For global or control params use setGlobalParam or setControlParam").throw;
+		});
 		value = value.asInteger.min(127).max(0);
-		if (bParam != nil, {
-			midiOut.sysex(this.paramChangePacket(bParam, value, location));
-			if (sound != nil, { sound.data[bParam.sysex] = value; });
+		if (useCache.not || sound == nil || sound.data[bParam.sysex] != value, {
+			if (bParam.control != nil, {
+				midiOut.control(location, bParam.control, value);
+			}, {
+				midiOut.sysex(this.paramChangePacket(bParam, value, location));
+			});
+		});
+		if (sound != nil, {
+			sound.data[bParam.sysex] = value;
+		}, {
+			if (useCache, {
+				this.createSound(editBuffer, location).data[bParam.sysex] = value;
+			});
 		});
 	}
 
