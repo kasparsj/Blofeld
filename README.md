@@ -1,4 +1,4 @@
-# Blofeld
+# Blofeld quark
 [WIP] SuperCollider quark for working with Blofeld
 
 ### connect
@@ -87,13 +87,13 @@ Pdef(\blofeldFilterExample).stop;
 ```
 ### wavetable example
 ```supercollider
-// connect
 (
+// connect
 ~blofeld = Blofeld.new.connect("Blofeld", "");
 )
 
-// create 10 wavetables with increasing complexity in first 10 user slots
 (
+// create 10 wavetables with increasing complexity in first 10 user slots
 ~createWavetable = { |i|
 	// from: http://sccode.org/1-5bF#c876
 	//random number of envelope segments
@@ -123,10 +123,10 @@ r = Routine({
 r.play;
 )
 
+(
 // multimode needs to be switched on manually
 //~blofeld.multiMode(true); // <- will give you an error
 // initialize first 10 channels
-(
 r = Routine({
 	10.do({ |i|
 		("init sound"+i).postln;
@@ -137,8 +137,8 @@ r = Routine({
 r.play;
 )
 
-// patterns from: http://sccode.org/1-5bF#c876
 (
+// patterns from: http://sccode.org/1-5bF#c876
 t = TempoClock.new(90/60).permanent_(true);
 ~blofeld.setParam(\effect1Type, Blofeld.effect[\tripleFX]);
 ~blofeld.setParam(\effect2Type, Blofeld.effect[\reverb]);
@@ -392,8 +392,8 @@ Pdef(\rhythms,
 ).play(t,quant:1);
 )
 
-// stop everything
 (
+// stop everything
 Pdef(\pad).stop;
 Pdef(\pulse).stop;
 Pdef(\melody).stop;
