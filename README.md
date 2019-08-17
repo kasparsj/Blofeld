@@ -1,5 +1,5 @@
 # Blofeld quark
-[WIP] SuperCollider quark for working with Blofeld
+SuperCollider quark for working with Blofeld
 
 ### connect
 ```supercollider
