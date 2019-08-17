@@ -129,6 +129,21 @@ Blofeld {
 		^sound;
 	}
 
+	removeSound { |bank, program|
+		var key = this.getKey(bank, program);
+		sounds.removeAt(key);
+	}
+
+	clearEditBuffer { |parts = 0|
+		if (parts.isArray, {
+			parts.do { |part|
+				this.removeSound(editBuffer, part);
+			};
+		}, {
+			this.removeSound(editBuffer, parts);
+		});
+	}
+
 	getKey { |bank = 0x7F, program = 0x00|
 		var key = "b" ++ bank.asHexString(2) ++ "p" ++ program.asHexString(2);
 		^key.asSymbol;
