@@ -87,10 +87,15 @@ Pdef(\blofeldFilterExample).stop;
 ```
 ### wavetable example
 ```supercollider
-~blofeld = Blofeld.new.connect("Blofeld", "");
+// connect
 (
+~blofeld = Blofeld.new.connect("Blofeld", "");
+)
+
 // create 10 wavetables with increasing complexity in first 10 user slots
+(
 ~createWavetable = { |i|
+	// from: http://sccode.org/1-5bF#c876
 	//random number of envelope segments
 	var numSegs = i.linexp(0,9,4,40).round;
 	// make every wave slightly different
@@ -108,7 +113,6 @@ Pdef(\blofeldFilterExample).stop;
 	});
 	~blofeld.sendWavetable(80+i, wavetable, "new sine wt"++(i+1));
 };
-
 r = Routine({
 	10.do { |i|
 		("creating wt"+i).postln;
@@ -119,11 +123,10 @@ r = Routine({
 r.play;
 )
 
-(
-t = TempoClock.new(90/60).permanent_(true);
 // multimode needs to be switched on manually
-//~blofeld.multiMode(true);
+//~blofeld.multiMode(true); // <- will give you an error
 // initialize first 10 channels
+(
 r = Routine({
 	10.do({ |i|
 		("init sound"+i).postln;
@@ -134,7 +137,9 @@ r = Routine({
 r.play;
 )
 
+// patterns from: http://sccode.org/1-5bF#c876
 (
+t = TempoClock.new(90/60).permanent_(true);
 ~blofeld.setParam(\effect1Type, Blofeld.effect[\tripleFX]);
 ~blofeld.setParam(\effect2Type, Blofeld.effect[\reverb]);
 ~shapes = [Blofeld.shape[\sine]]++(Blofeld.shape[\user1]..Blofeld.shape[\user9]);
@@ -387,6 +392,7 @@ Pdef(\rhythms,
 ).play(t,quant:1);
 )
 
+// stop everything
 (
 Pdef(\pad).stop;
 Pdef(\pulse).stop;
