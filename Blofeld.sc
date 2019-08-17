@@ -22,6 +22,7 @@ Blofeld {
 	classvar <fmSource;
 	classvar <modSource;
 	classvar <modDest;
+	classvar <noise;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
 
@@ -624,6 +625,13 @@ Blofeld {
 			f2Cutoff: 25,
 			f2Resonance: 26,
 			// TBC...
+		);
+		noise = (
+			brown: 0,
+			pink: 32,
+			white: 64,
+			blue: 96,
+			violet: 127,
 		);
 	}
 }
