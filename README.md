@@ -184,8 +184,6 @@ Pdef(\pad, Pbind(
 	\amp, Pexprand(0.05,0.07)*4,
 	\dur, Pwrand([1,4,6,9,12],[0.35,0.25,0.2,0.15,0.05],inf),
 	\chan, 0,
-	//\c0, Pexprand(1,2),
-	//\c1, Pexprand(1,2).neg,
 )).play;
 
 Pdef(\pulse, Pbind(
@@ -219,8 +217,6 @@ Pdef(\pulse, Pbind(
 		Prand([1,2,4,6,12],1)
 	],inf),
 	\chan, 1,
-	//\c0, 0,
-	//\c1, Pwhite(5,10).neg,
 )).play(t, quant: 1);
 
 Pdef(\melody, Pbind(
@@ -255,8 +251,6 @@ Pdef(\melody, Pbind(
 		Pseq([Prand([12,16,20]),1.5,1,1.5],1),
 	],inf),
 	\chan, 2,
-	//\c0, -2,
-	//\c1, -2,
 )).play(t, quant:1);
 
 //infinite sequence of various finite rhythmic patterns
@@ -270,10 +264,7 @@ Pdef(\rhythms,
 			\ampEnvSustain, 0,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pstutter(2, Pexprand(0,1)),
-			//\filter1Pan, Pwhite(-0.6,0.6) * 64 + 64,
 			\effect2Mix, Pwhite(0, 32),
-			//\detune, 100
-			//\osc1Detune, Pwhite(0, 127, inf),
 			\lfo1Shape, Blofeld.lfoShape[\random],
 			\lfo1Speed, 1,
 			\osc1FMSource, Blofeld.fmSource[\lfo1],
@@ -288,7 +279,6 @@ Pdef(\rhythms,
 			],inf)),
 			\amp, Pgeom(0.9, -6.dbamp, 4) * Pstutter(4,Pexprand(0.3,1)),
 			\chan, 3,
-			//\c1, exprand(8,20).neg,
 		),
 
 		Pbind(
@@ -299,7 +289,6 @@ Pdef(\rhythms,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pstutter(2, Pexprand(1,3)),
 			\effect2Mix, Pwhite(0,32),
-			//\detune, Pstutter(2, Pexprand(1,100)),
 			\lfo1Shape, Blofeld.lfoShape[\random],
 			\lfo1Speed, 1,
 			\osc1FMSource, Blofeld.fmSource[\lfo1],
@@ -310,7 +299,6 @@ Pdef(\rhythms,
 			\freq, Pstutter(2, Pexprand(1,200)),
 			\amp, Pgeom(0.4, -3.dbamp, 2)  * Pexprand(0.4,1),
 			\chan, 4,
-			//\c1, -10,
 		),
 
 		Pbind(
@@ -321,7 +309,6 @@ Pdef(\rhythms,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pseq([0,Pexprand(1,7,48)],1),
 			\effect2Mix, Pwhite(0,20),
-			//\detune, 100,
 			\lfo1Shape, Blofeld.lfoShape[\random],
 			\lfo1Speed, 1,
 			\osc1FMSource, Blofeld.fmSource[\lfo1],
@@ -332,7 +319,6 @@ Pdef(\rhythms,
 			\freq, Pstutter(6, Pexprand(1000,2000)),
 			\amp, Pseq([0.1,0.5,0.3],1),
 			\chan, 5,
-			//\c1, -12,
 		),
 
 		Pbind(
@@ -343,7 +329,6 @@ Pdef(\rhythms,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pseq([Pexprand(0,7,24),0,Pexprand(0,7,24)],1),
 			\effect2Mix, Pwhite(0,20),
-			//\detune, 100,
 			\lfo1Shape, Blofeld.lfoShape[\random],
 			\lfo1Speed, 1,
 			\osc1FMSource, Blofeld.fmSource[\lfo1],
@@ -354,7 +339,6 @@ Pdef(\rhythms,
 			\freq, Pstutter(6, Pexprand(1000,2000)),
 			\amp, Pseq([0.5,0.1,0.4],1),
 			\chan, 6,
-			//\c1, -12,
 		),
 
 		Pbind(
@@ -365,7 +349,6 @@ Pdef(\rhythms,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pstutter(6, Pexprand(0,1)),
 			\effect2Mix, Pwhite(0,20),
-			//\detune, Pstutter(6, Pexprand(1,100)),
 			\lfo1Shape, Blofeld.lfoShape[\random],
 			\lfo1Speed, 1,
 			\osc1FMSource, Blofeld.fmSource[\lfo1],
@@ -376,7 +359,6 @@ Pdef(\rhythms,
 			\freq, Pstutter(6, Pexprand(10,200)),
 			\amp, Pgeom(0.7, -4.dbamp, 6)  * Pexprand(0.4,1),
 			\chan, 7,
-			//\c1, -10,
 		),
 
 		Pbind(
@@ -387,7 +369,6 @@ Pdef(\rhythms,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pstutter(2, Pexprand(0,5)),
 			\effect2Mix, Pwhite(7,63),
-			//\detune, Pstutter(2, Pexprand(1,100)),
 			\lfo1Shape, Blofeld.lfoShape[\random],
 			\lfo1Speed, 1,
 			\osc1FMSource, Blofeld.fmSource[\lfo1],
@@ -403,7 +384,6 @@ Pdef(\rhythms,
 			\freq, Pstutter(2, Pexprand(10,200)),
 			\amp, 0.5,
 			\chan, 8,
-			//\c1, -10,
 		),
 
 		Pbind(
@@ -413,9 +393,7 @@ Pdef(\rhythms,
 			\ampEnvSustain, 0,
 			\ampEnvDecay, 127,
 			\ampEnvRelease, Pexprand(0,1),
-			//\filter1Pan, Pseq([1,-1] * 63 + 64,inf),
 			\effect2Mix, 0,
-			//\detune, 0,
 			// midi
 			\midicmd, \noteOn,
 			\dur, Prand([
@@ -425,7 +403,6 @@ Pdef(\rhythms,
 			\freq, Pstutter(16,Pexprand(1000,20000,inf)),
 			\amp, 0.13,
 			\chan, 9,
-			//\c1, -4,
 		),
 	],
 	[40,18,3,3,15,25,5].normalizeSum, inf)
