@@ -268,8 +268,8 @@ Blofeld {
 
 	createWavetable { |levels, times, curve = 'lin'|
 		var signal = Signal.newClear;
-		64.do {
-			signal = signal ++ Env(levels.value, times.value, curve.value).asSignal(128);
+		64.do { |wave|
+			signal = signal ++ Env(levels.value(wave), times.value(wave), curve.value(wave)).asSignal(128);
 		};
 		^signal;
 	}
