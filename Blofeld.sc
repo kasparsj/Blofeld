@@ -266,6 +266,14 @@ Blofeld {
 		^value;
 	}
 
+	createWavetable { |levels, times, curve = 'lin'|
+		var signal = Signal.newClear;
+		64.do {
+			signal = signal ++ Env(levels.value, times.value, curve.value).asSignal(128);
+		};
+		^signal;
+	}
+
 	sendWavetable { |slot, signal, name|
 		var mult = 1;
 		if (slot < 80 || slot > 118, {
