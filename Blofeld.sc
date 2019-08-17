@@ -19,6 +19,8 @@ Blofeld {
 	classvar <category;
 	classvar <effect;
 	classvar <fmSource;
+	classvar <modSource;
+	classvar <modDest;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
 
@@ -531,6 +533,69 @@ Blofeld {
 			ampEnv: 9,
 			env3: 10,
 			env4: 11,
+		);
+		modSource = (
+			off: 0,
+			lfo1: 1,
+			lfo1mw: 2,
+			lfo2: 3,
+			lfo2press: 4,
+			lfo3: 5,
+			filterEnv: 6,
+			ampEnv: 7,
+			env3: 8,
+			env4: 9,
+			keytrack: 10,
+			velocity: 11,
+			relVelo: 12,
+			pressure: 13,
+			polyPress: 14,
+			pitchBend: 15,
+			modWheel: 16,
+			sustain: 17,
+			footCtrl: 18,
+			breathCtrl: 19,
+			controlW: 20,
+			controlX: 21,
+			controlY: 22,
+			controlZ: 23,
+			unisonoV: 24,
+			modifier1: 25,
+			modifier2: 26,
+			modifier3: 27,
+			modifier4: 28,
+			minimum: 29,
+			maximum: 30,
+		);
+		modDest = (
+			pitch: 0,
+			osc1Pitch: 1,
+			osc1FM: 2,
+			osc1PWWave: 3,
+			osc2Pitch: 4,
+			osc2FM: 5,
+			osc2PWWave: 6,
+			osc3Pitch: 7,
+			osc3FM: 8,
+			osc3PW: 9,
+			osc1Level: 10,
+			osc1Balance: 11,
+			osc2Level: 12,
+			osc2Balance: 13,
+			osc3Level: 14,
+			osc3Balance: 15,
+			rmodLevel: 16,
+			rmodBalance: 17,
+			noiseLevel: 18,
+			noiseBalance: 19,
+			f1Cutoff: 20,
+			f1Resonance: 21,
+			f1FM: 22,
+			f1Drive: 23,
+			f1Pan: 24,
+			f2Cutoff: 25,
+			f2Resonance: 26,
+			// TBC...
 		);
 	}
 }
