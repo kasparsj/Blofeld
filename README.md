@@ -87,6 +87,7 @@ Pdef(\blofeldFilterExample).stop;
 ```
 ### wavetable example
 ```supercollider
+~blofeld = Blofeld.new.connect("Blofeld", "");
 (
 // create 10 wavetables with increasing complexity in first 10 user slots
 ~createWavetable = { |i|
@@ -137,9 +138,6 @@ r.play;
 ~blofeld.setParam(\effect1Type, Blofeld.effect[\tripleFX]);
 ~blofeld.setParam(\effect2Type, Blofeld.effect[\reverb]);
 ~shapes = [Blofeld.shape[\sine]]++(Blofeld.shape[\user1]..Blofeld.shape[\user9]);
-~tMult2 = 24;
-~rMult = 6;
-~fMult = 10;
 Pdef(\pad, Pbind(
 	\type, \blofeld,
 	\osc1Shape, Prand(~shapes[0..3], inf),
