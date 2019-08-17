@@ -10,74 +10,77 @@ BlofeldParam {
 	var <sysex;
 	var <control;
 	var <values;
+	var <defaultValue;
 	var <isGlobal = false;
 
 	*initClass {
+		Class.initClassTree(Blofeld);
 		params = [
 			// osc1
-			BlofeldParam.new(\osc1Octave, 1, 27, (0..8)*12+16),
-			BlofeldParam.new(\osc1Semitone, 2, 28, (52..76)),
-			BlofeldParam.new(\osc1Detune, 3, 29, (0..127)),
-			BlofeldParam.new(\osc1BendRange, 4, nil, (40..88)),
-			BlofeldParam.new(\osc1Keytrack, 5, nil, (0..127)),
-			BlofeldParam.new(\osc1FMSource, 6, nil, (0..11)),
+			BlofeldParam.new(\osc1Octave, 1, 27, (0..8)*12+16, 64), // 16..112
+			BlofeldParam.new(\osc1Semitone, 2, 28, (52..76), 64),
+			BlofeldParam.new(\osc1Detune, 3, 29, (0..127), 64),
+			BlofeldParam.new(\osc1BendRange, 4, nil, (40..88), 64),
+			BlofeldParam.new(\osc1Keytrack, 5, nil, (0..127), 64),
+			BlofeldParam.new(\osc1FMSource, 6, nil, Blofeld.fmSource),
 			BlofeldParam.new(\osc1FM, 7, 30, (0..127)),
-			BlofeldParam.new(\osc1Shape, 8, 31, (0..72)),
+			BlofeldParam.new(\osc1Shape, 8, 31, Blofeld.shape),
 			BlofeldParam.new(\osc1PW, 9, 33, (0..127)),
-			BlofeldParam.new(\osc1PWMSource, 10, nil, (0..30)),
-			BlofeldParam.new(\osc1PWMAmount, 11, 34, (0..127)),
-			BlofeldParam.new(\osc1LimitWT, 14, nil, (0..1)),
+			BlofeldParam.new(\osc1PWMSource, 10, nil, Blofeld.modSource),
+			BlofeldParam.new(\osc1PWMAmount, 11, 34, (0..127), 64),
+			BlofeldParam.new(\osc1LimitWT, 14, nil, Blofeld.onOff),
 			BlofeldParam.new(\osc1Brilliance, 16, nil, (0..127)), // 12
 			// osc2
-			BlofeldParam.new(\osc2Octave, 17, 35, (0..8)*12+16),
-			BlofeldParam.new(\osc2Semitone, 18, 36, (52..76)),
-			BlofeldParam.new(\osc2Detune, 19, 37, (0..127)),
-			BlofeldParam.new(\osc2BendRange, 20, nil, (40..88)),
-			BlofeldParam.new(\osc2Keytrack, 21, nil, (0..127)),
-			BlofeldParam.new(\osc2FMSource, 22, nil, (0..11)),
+			BlofeldParam.new(\osc2Octave, 17, 35, (0..8)*12+16, 64),
+			BlofeldParam.new(\osc2Semitone, 18, 36, (52..76), 64),
+			BlofeldParam.new(\osc2Detune, 19, 37, (0..127), 64),
+			BlofeldParam.new(\osc2BendRange, 20, nil, (40..88), 64),
+			BlofeldParam.new(\osc2Keytrack, 21, nil, (0..127), 64),
+			BlofeldParam.new(\osc2FMSource, 22, nil, Blofeld.fmSource),
 			BlofeldParam.new(\osc2FM, 23, 38, (0..127)),
-			BlofeldParam.new(\osc2Shape, 24, 39, (0..72)),
+			BlofeldParam.new(\osc2Shape, 24, 39, Blofeld.shape),
 			BlofeldParam.new(\osc2PW, 25, 40, (0..127)),
-			BlofeldParam.new(\osc2PWMSource, 26, nil, (0..30)),
-			BlofeldParam.new(\osc2PWMAmount, 27, 41, (0..127)),
-			BlofeldParam.new(\osc2LimitWT, 30, nil, (0..1)),
-			BlofeldParam.new(\osc2Brilliance, 32, nil, (0..127)), // 25
+			BlofeldParam.new(\osc2PWMSource, 26, nil, Blofeld.modSource),
+			BlofeldParam.new(\osc2PWMAmount, 27, 41, (0..127), 64),
+			BlofeldParam.new(\osc2LimitWT, 30, nil, Blofeld.onOff),
+			BlofeldParam.new(\osc2Brilliance, 32, nil, (0..127)),
 			// osc3
-			BlofeldParam.new(\osc3Octave, 33, 42, (0..8)*12+16),
-			BlofeldParam.new(\osc3Semitone, 34, 43, (52..76)),
-			BlofeldParam.new(\osc3Detune, 35, 44, (0..127)),
-			BlofeldParam.new(\osc3BendRange, 36, nil, (40..88)),
-			BlofeldParam.new(\osc3Keytrack, 37, nil, (0..127)),
-			BlofeldParam.new(\osc3FMSource, 38, nil, (0..11)),
+			BlofeldParam.new(\osc3Octave, 33, 42, (0..8)*12+16, 64),
+			BlofeldParam.new(\osc3Semitone, 34, 43, (52..76), 64),
+			BlofeldParam.new(\osc3Detune, 35, 44, (0..127), 64),
+			BlofeldParam.new(\osc3BendRange, 36, nil, (40..88), 64),
+			BlofeldParam.new(\osc3Keytrack, 37, nil, (0..127), 64),
+			BlofeldParam.new(\osc3FMSource, 38, nil, Blofeld.fmSource),
 			BlofeldParam.new(\osc3FM, 39, 45, (0..127)),
-			BlofeldParam.new(\osc3Shape, 40, 46, (0..4)), // only supports basic shapes
+			BlofeldParam.new(\osc3Shape, 40, 46, Blofeld.osc3Shape),
 			BlofeldParam.new(\osc3PW, 41, 47, (0..127)),
-			BlofeldParam.new(\osc3PWMSource, 42, nil, (0..30)),
-			BlofeldParam.new(\osc3PWMAmount, 43, 48, (0..127)),
-			BlofeldParam.new(\osc3Brilliance, 48, nil, (0..127)), // 37
+			BlofeldParam.new(\osc3PWMSource, 42, nil, Blofeld.modSource),
+			BlofeldParam.new(\osc3PWMAmount, 43, 48, (0..127), 64),
+			BlofeldParam.new(\osc3Brilliance, 48, nil, (0..127)),
 			// osc settings
-			BlofeldParam.new(\osc2SyncO3, 49, 49, (0..1)), // Sync
-			BlofeldParam.new(\oscPitchSource, 50, nil, (0..30)),
-			BlofeldParam.new(\oscPitchAmount, 51, nil, (0..127)),
+			BlofeldParam.new(\osc2SyncO3, 49, 49, Blofeld.onOff),
+			BlofeldParam.new(\oscPitchSource, 50, nil, Blofeld.modSource),
+			BlofeldParam.new(\oscPitchAmount, 51, nil, (0..127), 64),
 			// glide
-			BlofeldParam.new(\glide, 53, 65, (0..1)), // 41
-			BlofeldParam.new(\glideMode, 56, 51, (0..3)),
+			BlofeldParam.new(\glide, 53, 65, Blofeld.onOff),
+			BlofeldParam.new(\glideMode, 56, 51, Blofeld.glideMode),
 			BlofeldParam.new(\glideRate, 57, nil, (0..127)),
 			// unisono
-			BlofeldParam.new(\allocationUnisonoMode, 58, nil, (0..127)), // 44
+			BlofeldParam.new(\allocationUnisonoMode, 58, nil, (0..127)),
 			BlofeldParam.new(\unisonoUniDetune, 59, nil, (0..127)),
 			// mixer
-			BlofeldParam.new(\osc1Level, 61, 52, (0..127)), // 46
+			BlofeldParam.new(\osc1Level, 61, 52, (0..127), 127), // 46
 			BlofeldParam.new(\osc1Balance, 62, 53, (0..127)),
-			BlofeldParam.new(\osc2Level, 63, 56, (0..127)),
+			BlofeldParam.new(\osc2Level, 63, 56, (0..127), 127),
 			BlofeldParam.new(\osc2Balance, 64, 57, (0..127)),
-			BlofeldParam.new(\osc3Level, 65, 58, (0..127)),
+			BlofeldParam.new(\osc3Level, 65, 58, (0..127), 127),
 			BlofeldParam.new(\osc3Balance, 66, 59, (0..127)),
 			BlofeldParam.new(\noiseLevel, 67, 60, (0..127)),
 			BlofeldParam.new(\noiseBalance, 68, 61, (0..127)),
-			BlofeldParam.new(\noiseColour, 69, 62, (0..127)),
+			BlofeldParam.new(\noiseColour, 69, 62, (0..127), 64),
 			BlofeldParam.new(\ringModLevel, 71, 54, (0..127)),
 			BlofeldParam.new(\ringModBalance, 72, 55, (0..127)),
+			// todo: done till here
 			// filter1
 			BlofeldParam.new(\filter1Type, 77, 68, (0..11)), // 57
 			BlofeldParam.new(\filter1Cutoff, 78, 69, (0..127)),
@@ -360,12 +363,21 @@ BlofeldParam {
 		);
 	}
 
-	*new { |name, sysex, control, values|
-		^super.newCopyArgs(name, sysex, control, values);
+	*new { |name, sysex, control, values, defaultValue = 0|
+		^super.newCopyArgs(name, sysex, control, values, defaultValue);
 	}
 
 	rand {
 		^values.choose;
+	}
+
+	label { |value|
+		var label = if (values.isArray, {
+			value;
+		}, {
+			values.findKeyForValue(value);
+		});
+		^label;
 	}
 
 	asString {
@@ -374,7 +386,7 @@ BlofeldParam {
 }
 
 BlofeldGlobal : BlofeldParam {
-	*new { |name, sysex, control, values|
-		^super.newCopyArgs(name, sysex, control, values, true);
+	*new { |name, sysex, control, values, defaultValue = 0|
+		^super.newCopyArgs(name, sysex, control, values, defaultValue, true);
 	}
 }

@@ -13,6 +13,7 @@ Blofeld {
 
 	classvar <bank;
 	classvar <shape;
+	classvar <osc3Shape;
 	classvar <lfoShape;
 	classvar <arpMode;
 	classvar <glideMode;
@@ -22,6 +23,7 @@ Blofeld {
 	classvar <fmSource;
 	classvar <modSource;
 	classvar <modDest;
+	classvar <onOff;
 	classvar <noise;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
@@ -33,6 +35,8 @@ Blofeld {
 	var <midiOut;
 
 	*initClass {
+		Class.initClassTree(Event);
+
 		this.initDictionaries();
 
 		Event.addEventType(\blofeld, { |server|
@@ -522,6 +526,13 @@ Blofeld {
 			user13: 98,
 			user14: 99,
 		);
+		osc3Shape = (
+			off: 0,
+			pulse: 1,
+			saw: 2,
+			triangle: 3,
+			sine: 4,
+		);
 		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, random: 4, sandh: 5);
 		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
 		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
@@ -641,6 +652,10 @@ Blofeld {
 			f2Cutoff: 25,
 			f2Resonance: 26,
 			// TBC...
+		);
+		onOff = (
+			off: 0,
+			on: 1,
 		);
 		noise = (
 			brown: 0,
