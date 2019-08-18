@@ -16,7 +16,10 @@ var program = rrand(0, 127);
 ### request sound
 ```supercollider
 // requires connected USB or MIDIOut from Blofeld
-~blofeld.requestSound();
+~blofeld.requestSound({|sound|
+	sound.printInfo;
+	//sound.printInfo(true); // print full info
+});
 ~blofeld.getParam(\filter1Type).postln;
 // print implemented param names
 BlofeldParam.byName.keys.postln;
