@@ -19,8 +19,8 @@ var program = rrand(0, 127);
 ~blofeld.requestSound({|sound|
 	sound.printInfo;
 	//sound.printInfo(true); // print full info
+	sound.getParam(\filter1Type).postln;
 });
-~blofeld.getParam(\filter1Type).postln;
 // print implemented param names
 BlofeldParam.byName.keys.postln;
 ```
