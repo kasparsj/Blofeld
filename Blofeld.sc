@@ -13,18 +13,34 @@ Blofeld {
 
 	classvar <bank;
 	classvar <shape;
+	classvar <fBalance;
 	classvar <osc3Shape;
 	classvar <lfoShape;
 	classvar <arpMode;
+	classvar <arpDirection;
+	classvar <arpClock;
 	classvar <glideMode;
 	classvar <filterType;
 	classvar <category;
-	classvar <effect;
+	classvar <effect1Type;
+	classvar <effect2Type;
 	classvar <fmSource;
 	classvar <modSource;
+	classvar <modSourceB;
 	classvar <modDest;
+	classvar <driveCurve;
+	classvar <filterRouting;
+	classvar <envMode;
+	classvar <envTrigger;
+	classvar <operator;
+	classvar <allocation;
+	classvar <unisono;
+	classvar <m64p63;
+	classvar <m24p24;
+	classvar <m200p196perc;
 	classvar <onOff;
 	classvar <noise;
+	classvar <ascii;
 	classvar <initSoundData;
 	classvar <numInstances = 0;
 
@@ -534,7 +550,6 @@ Blofeld {
 			sine: 4,
 		);
 		lfoShape = (sine: 0, triangle: 1, square: 2, saw: 3, random: 4, sandh: 5);
-		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
 		glideMode = (portamento: 0, fingeredp: 1, glissando: 2, fingeredg: 3);
 		category = (
 			init: 0,
@@ -565,7 +580,15 @@ Blofeld {
 			combm:10,
 			ppglp: 11,
 		);
-		effect = (
+		effect1Type = (
+			bypass: 0,
+			chorus: 1,
+			flanger: 2,
+			phaser: 3,
+			overdrive: 4,
+			tripleFX: 5,
+		);
+		effect2Type = (
 			bypass: 0,
 			chorus: 1,
 			flanger: 2,
@@ -623,6 +646,9 @@ Blofeld {
 			minimum: 29,
 			maximum: 30,
 		);
+		modSourceB = modSource.copy;
+		modSourceB.removeAt(\off);
+		modSourceB.put(\constant, 0);
 		modDest = (
 			pitch: 0,
 			osc1Pitch: 1,
@@ -653,6 +679,83 @@ Blofeld {
 			f2Resonance: 26,
 			// TBC...
 		);
+		driveCurve = (
+			\clipping: 0,
+			\tube: 1,
+			\hard: 2,
+			\medium: 3,
+			\soft: 4,
+			\pickup1: 5,
+			\pickup2: 6,
+			\rectifier: 7,
+			\square: 8,
+			\binary: 9,
+			\overflow: 10,
+			\sineShaper: 11,
+			\osc1Mod: 12,
+		);
+		filterRouting = (
+			\parallel: 0,
+			\serial: 1,
+		);
+		envMode = (
+			adsr: 0,
+			ads1ds2r: 1,
+			oneShot: 2,
+			loopS1S2: 3,
+			loopAll: 4,
+		);
+		envTrigger = (
+			\normal: 0,
+			\single: 1
+		);
+		operator = (
+			\plus: 0,
+			\minus: 1,
+			\mult: 2,
+			\and: 3,
+			\or: 4,
+			\xor: 5,
+			\max: 6,
+			\min: 7,
+		);
+		arpMode = (off: 0, on: 1, oneshot: 2, hold: 3);
+		arpClock = (
+			\one96: 0
+			// todo: TBC
+		);
+		arpDirection = (
+			up: 0,
+			down: 1,
+			altUp: 2,
+			altDown: 3,
+		);
+		m64p63 = ();
+		128.do { |i|
+			var key = if ((i-64) > 0, { ("+"++(i-64)) }, { (i-64) }).asSymbol;
+			m64p63.put(key, i);
+		};
+		m24p24 = ();
+		49.do { |i|
+			var key = if ((i-24) > 0, { ("+"++(i-24)) }, { (i-24) }).asSymbol;
+			m24p24.put(key, 40+i);
+		};
+		m200p196perc = ();
+		128.do { |i|
+			var key = (if ((i-64) > 0, { ("+"++(i-64*3.125).asInteger) }, { (i-64*3.125).asInteger }).asString++"%").asSymbol;
+			m200p196perc.put(key, i);
+		};
+		fBalance = ();
+		128.do { |i|
+			var key = if (i < 64, { "F1"+(i-64).abs }, {
+				if (i == 64, {
+					"middle"
+				}, {
+					("F2"+(i-64))
+				});
+			}).asSymbol;
+			fBalance.put(key, i);
+		};
 		onOff = (
 			off: 0,
 			on: 1,
@@ -663,6 +766,22 @@ Blofeld {
 			white: 64,
 			blue: 96,
 			violet: 127,
+		);
+		ascii = ();
+		(32..127).do { |i|
+			ascii.put(i.asAscii.asSymbol, i);
+		};
+		allocation = (
+			poly: 0,
+			mono: 1,
+		);
+		unisono = (
+			off: 0,
+			dual: 1,
+			three: 2,
+			four: 3,
+			five: 4,
+			six: 5,
 		);
 	}
 }
