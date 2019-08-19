@@ -181,14 +181,14 @@ BlofeldGui {
 	}
 
 	createButtons {
-		body = CompositeView.new(window, Rect.new(margin, 50 + (gap * 2), windowWidth - sidebarWidth - margin - gap, windowHeight - 100));
+		body = CompositeView.new(window, Rect.new(0, 50, windowWidth - sidebarWidth, 315));
+
+		body.decorator = FlowLayout(body.bounds, Point(margin, margin), Point(gap, gap));
 
 		buttonArray = 50.collect({ |i|
-			var col = i.div(numberOfRows);
-			var row = i % numberOfRows;
 			Button.new(
 				parent: body,
-				bounds: Rect.new(col * (buttonWidth + gap), row * (buttonHeight + gap), buttonWidth, buttonHeight),
+				bounds: Point.new(buttonWidth, buttonHeight),
 			)
 			.action_({ |button|
 				if (button.string.size > 0, {
@@ -202,7 +202,7 @@ BlofeldGui {
 	}
 
 	createFooter {
-		footer1 = CompositeView.new(window, Rect.new(margin, 365, windowWidth - sidebarWidth - (margin * 2), 50));
+		footer1 = CompositeView.new(window, Rect.new(margin, 360, windowWidth - sidebarWidth - (margin * 2), 50));
 
 		currentSoundText = StaticText.new(
 			parent: footer1,
