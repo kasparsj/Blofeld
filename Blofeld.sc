@@ -30,6 +30,7 @@ Blofeld {
 	classvar <onOff;
 	classvar <noise;
 	classvar <ascii;
+	classvar <octave;
 	classvar <numInstances = 0;
 
 	var <>deviceID;
@@ -53,8 +54,8 @@ Blofeld {
 						~blofeld.global.set(key, currentEnvironment[key]);
 						uploadGlobal = true;
 					}, {
-						var chan = if (~chan == nil, { 0 }, { ~chan });
-						var useCache = if (~useCache == nil, { true }, { ~useCache });
+						var chan = ~chan ?? 0;
+						var useCache = ~useCache ?? true;
 						~blofeld.editBuffer.set(key, currentEnvironment[key], chan, useCache);
 					});
 				});
@@ -418,7 +419,13 @@ Blofeld {
 			f1Pan: 24,
 			f2Cutoff: 25,
 			f2Resonance: 26,
-			// TBC...
+			f2FM: 27,
+			f2Drive: 28,
+			f2Pan: 29,
+			volume: 30,
+			lfo1Speed: 31,
+			lfo2Speed: 32,
+			// todo: TBC
 		);
 		driveCurve = (
 			\clipping: 0,
@@ -524,5 +531,9 @@ Blofeld {
 			five: 4,
 			six: 5,
 		);
+		octave = ();
+		9.do { |i|
+			octave.put(((128/(i*2)).asInteger.asString++"'").asSymbol, 16+(i*12));
+		}
 	}
 }

@@ -17,15 +17,18 @@ BlofeldEditBuffer {
 	set { |param, value = 0, location = 0, useCache = false|
 		var bParam = BlofeldParam.byName[param];
 		var sound = parts[location];
-		var uploadChange = useCache.not;
+		var uploadChange = useCache.not || (sound == nil);
 		if (bParam == nil, {
 			Error("Invalid param %".format(param)).throw;
 		});
 		if (bParam.sysex == nil, {
 			Error("For global or control params use setGlobalParam or setControlParam").throw;
 		});
-		value = value.asInteger.min(127).max(0);
-		uploadChange = (uploadChange || if (sound == nil, { true }, { sound.data[bParam.sysex] != value }));
+		value = bParam.value(value.asInteger);
+		if (sound == nil, {
+			sound = BlofeldSound.new(editBufferBank, location);
+		});
+		uploadChange = uploadChange || (sound.data[bParam.sysex] != value);
 		if (uploadChange, {
 			if (bParam.control != nil, {
 				blofeld.midiOut.control(location, bParam.control, value);
@@ -33,15 +36,11 @@ BlofeldEditBuffer {
 				blofeld.midiOut.sysex(BlofeldSysex.paramChangePacket(bParam, value, location, blofeld.deviceID));
 			});
 		});
-		if (sound != nil, {
-			sound.data[bParam.sysex] = value;
-		}, {
-			if (useCache, {
-				sound = BlofeldSound.new(editBufferBank, location);
-				sound.data[bParam.sysex] = value;
-				parts.put(location, sound);
-			});
+		sound.data[bParam.sysex] = value;
+		if (useCache, {
+			parts.put(location, sound);
 		});
+		^value;
 	}
 
 	download { |callback = nil, location = 0|

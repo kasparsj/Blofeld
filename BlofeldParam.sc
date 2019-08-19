@@ -13,13 +13,14 @@ BlofeldParam {
 	var <defaultValue;
 	var <isGlobal = false;
 	var <relParam;
+	var <>sequential = true;
 
 	*initClass {
 		Class.initClassTree(Blofeld);
 
 		params = [
 			// osc1
-			BlofeldParam.new(\osc1Octave, 1, 27, (0..8)*12+16, 64), // 16..112
+			BlofeldParam.new(\osc1Octave, 1, 27, Blofeld.octave, 64).sequential_(false), // 16..112
 			BlofeldParam.new(\osc1Semitone, 2, 28, (52..76), 64),
 			BlofeldParam.new(\osc1Detune, 3, 29, Blofeld.m64p63, 64),
 			BlofeldParam.new(\osc1BendRange, 4, nil, Blofeld.m24p24, 64),
@@ -33,7 +34,7 @@ BlofeldParam {
 			BlofeldParam.new(\osc1LimitWT, 14, nil, Blofeld.onOff),
 			BlofeldParam.new(\osc1Brilliance, 16, nil, (0..127)), // 12
 			// osc2
-			BlofeldParam.new(\osc2Octave, 17, 35, (0..8)*12+16, 64),
+			BlofeldParam.new(\osc2Octave, 17, 35, Blofeld.octave, 64).sequential_(false),
 			BlofeldParam.new(\osc2Semitone, 18, 36, (52..76), 64),
 			BlofeldParam.new(\osc2Detune, 19, 37, Blofeld.m64p63, 64),
 			BlofeldParam.new(\osc2BendRange, 20, nil, Blofeld.m24p24, 64),
@@ -47,7 +48,7 @@ BlofeldParam {
 			BlofeldParam.new(\osc2LimitWT, 30, nil, Blofeld.onOff),
 			BlofeldParam.new(\osc2Brilliance, 32, nil, (0..127)),
 			// osc3
-			BlofeldParam.new(\osc3Octave, 33, 42, (0..8)*12+16, 64),
+			BlofeldParam.new(\osc3Octave, 33, 42, Blofeld.octave, 64).sequential_(false),
 			BlofeldParam.new(\osc3Semitone, 34, 43, (52..76), 64),
 			BlofeldParam.new(\osc3Detune, 35, 44, Blofeld.m64p63, 64),
 			BlofeldParam.new(\osc3BendRange, 36, nil, Blofeld.m24p24, 64),
@@ -429,6 +430,24 @@ BlofeldParam {
 
 	rand {
 		^values.choose;
+	}
+
+	min {
+		^values.minItem;
+	}
+
+	max {
+		^values.maxItem;
+	}
+
+	nearest { |value|
+		^values.asList.sort({ |a, b|
+			(a - value).abs < (b - value).abs;
+		})[0];
+	}
+
+	value { |value|
+		^if (sequential, { value.min(this.max).max(this.min) }, { this.nearest(value) });
 	}
 
 	label { |value|
