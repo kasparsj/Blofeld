@@ -130,7 +130,7 @@ BlofeldSoundSet {
 			sorted.do { |sound|
 				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID, false);
 				sysexFile.addEvent(packet);
-			}
+			};
 			sysexFile.write;
 		});
 	}
