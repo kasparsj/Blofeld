@@ -108,15 +108,31 @@ BlofeldSoundSet {
 	}
 
 	saveToFile { |path, deviceID = 0x00|
-		var midiFile = SimpleMIDIFile.new(path);
+		var sorted;
 		this.validate;
-		// todo: sort sounds?
-		sounds.do { |sound|
-			var packet = BlofeldSysex.soundDumpPacket(sound, deviceID, false);
-			// prefix with [track, absTime]
-			midiFile.addSysexEvent([0, 0] ++ packet);
-		};
-		midiFile.write;
+		sorted = sounds.asList.sort({ |a, b|
+			if (a.bank == b.bank, {
+				a.program < b.progam
+			}, {
+				a.bank < b.bank
+			});
+		});
+		if (path.extension.toLower == "mid", {
+			var midiFile = SimpleMIDIFile.new(path);
+			sorted.do { |sound|
+				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID, false);
+				// prefix with [track, absTime]
+				midiFile.addSysexEvent([0, 0] ++ packet);
+			};
+			midiFile.write;
+		}, {
+			var sysexFile = SysexFile.new(path);
+			sorted.do { |sound|
+				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID, false);
+				sysexFile.addEvent(packet);
+			}
+			sysexFile.write;
+		});
 	}
 
 	download { |sound, callback = nil|

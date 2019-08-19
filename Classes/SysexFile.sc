@@ -3,7 +3,7 @@ SysexFile {
 	const <byteEnd = -9;
 
 	var <>pathName;
-	var <events;
+	var <>events;
 
 	*new { |pathName|
 		^super.newCopyArgs(pathName, []);
@@ -57,5 +57,9 @@ SysexFile {
 		theFile = File(newFileName,"wb+");
 
 		this.writeFile( theFile );
+	}
+
+	addEvent { |event|
+		events = events.add(event);
 	}
 }
