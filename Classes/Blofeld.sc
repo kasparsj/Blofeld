@@ -78,7 +78,7 @@ Blofeld {
 	}
 
 	init {
-		sounds = BlofeldSoundSet.new(this);
+		sounds = BlofeldSoundset.new(this);
 		global = BlofeldGlobal.new(this);
 		editBuffer = BlofeldEditBuffer.new(this);
 		if (Blofeld.numInstances == 1, {
@@ -129,7 +129,7 @@ Blofeld {
 					sounds.download(obj, callback);
 				});
 			},
-			BlofeldSoundSet, {
+			BlofeldSoundset, {
 				obj.blofeld = this;
 				obj.downloadAll(callback);
 			},
