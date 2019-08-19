@@ -321,56 +321,56 @@ BlofeldParam {
 			BlofeldParam.new(\category, 379, nil, Blofeld.category, -1),
 
 			// global data
-			BlofeldGlobal.new(\multiMode, 1, nil, (0..1)),
-			BlofeldGlobal.new(\multiBank1, 2, nil, (0..7)), // these seem to be read-only
-			BlofeldGlobal.new(\multiSound1, 3, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank2, 4, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound2, 5, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank3, 6, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound3, 7, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank4, 8, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound4, 9, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank5, 10, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound5, 11, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank6, 12, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound6, 13, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank7, 14, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound7, 15, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank8, 16, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound8, 17, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank9, 18, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound9, 19, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank10, 20, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound10, 21, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank11, 22, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound11, 23, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank12, 24, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound12, 25, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank13, 26, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound13, 27, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank14, 28, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound14, 29, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank15, 30, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound15, 31, nil, (0..127)),
-			BlofeldGlobal.new(\multiBank16, 32, nil, (0..7)),
-			BlofeldGlobal.new(\multiSound16, 33, nil, (0..127)),
-			BlofeldGlobal.new(\autoEdit, 35, nil, (0..1)),
-			BlofeldGlobal.new(\midiChannel, 36, nil, (0..16)), // omni..16
-			BlofeldGlobal.new(\deviceID, 37, nil, (0..126)),
-			BlofeldGlobal.new(\popupTime, 38, nil, (1..127)), // 0.1s..15.5s
-			BlofeldGlobal.new(\contrast, 39, nil, (0..127)),
-			BlofeldGlobal.new(\masterTune, 40, nil, (54..74)), // 430..450
-			BlofeldGlobal.new(\transpose, 41, nil, (52..76)), // -12..+12
-			BlofeldGlobal.new(\ctrlSend, 44, nil, (0..3)),
-			BlofeldGlobal.new(\ctrlReceive, 45, nil, (0..1)),
-			BlofeldGlobal.new(\clock, 48, nil, (0..1)), // auto, internal
-			BlofeldGlobal.new(\velCurve, 50, nil, (0..8)), // linear..fix
-			BlofeldGlobal.new(\controlW, 51, nil, (0..120)),
-			BlofeldGlobal.new(\controlX, 52, nil, (0..120)),
-			BlofeldGlobal.new(\controlY, 53, nil, (0..120)),
-			BlofeldGlobal.new(\controlZ, 54, nil, (0..120)),
-			BlofeldGlobal.new(\volume, 55, 7, (0..127)),
-			BlofeldGlobal.new(\catFilter, 56, nil, (0..13)),
+			BlofeldGlobalParam.new(\multiMode, 1, nil, (0..1)),
+			BlofeldGlobalParam.new(\multiBank1, 2, nil, (0..7)), // these seem to be read-only
+			BlofeldGlobalParam.new(\multiSound1, 3, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank2, 4, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound2, 5, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank3, 6, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound3, 7, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank4, 8, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound4, 9, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank5, 10, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound5, 11, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank6, 12, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound6, 13, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank7, 14, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound7, 15, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank8, 16, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound8, 17, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank9, 18, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound9, 19, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank10, 20, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound10, 21, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank11, 22, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound11, 23, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank12, 24, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound12, 25, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank13, 26, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound13, 27, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank14, 28, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound14, 29, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank15, 30, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound15, 31, nil, (0..127)),
+			BlofeldGlobalParam.new(\multiBank16, 32, nil, (0..7)),
+			BlofeldGlobalParam.new(\multiSound16, 33, nil, (0..127)),
+			BlofeldGlobalParam.new(\autoEdit, 35, nil, (0..1)),
+			BlofeldGlobalParam.new(\midiChannel, 36, nil, (0..16)), // omni..16
+			BlofeldGlobalParam.new(\deviceID, 37, nil, (0..126)),
+			BlofeldGlobalParam.new(\popupTime, 38, nil, (1..127)), // 0.1s..15.5s
+			BlofeldGlobalParam.new(\contrast, 39, nil, (0..127)),
+			BlofeldGlobalParam.new(\masterTune, 40, nil, (54..74)), // 430..450
+			BlofeldGlobalParam.new(\transpose, 41, nil, (52..76)), // -12..+12
+			BlofeldGlobalParam.new(\ctrlSend, 44, nil, (0..3)),
+			BlofeldGlobalParam.new(\ctrlReceive, 45, nil, (0..1)),
+			BlofeldGlobalParam.new(\clock, 48, nil, (0..1)), // auto, internal
+			BlofeldGlobalParam.new(\velCurve, 50, nil, (0..8)), // linear..fix
+			BlofeldGlobalParam.new(\controlW, 51, nil, (0..120)),
+			BlofeldGlobalParam.new(\controlX, 52, nil, (0..120)),
+			BlofeldGlobalParam.new(\controlY, 53, nil, (0..120)),
+			BlofeldGlobalParam.new(\controlZ, 54, nil, (0..120)),
+			BlofeldGlobalParam.new(\volume, 55, 7, (0..127)),
+			BlofeldGlobalParam.new(\catFilter, 56, nil, Blofeld.catFilter),
 
 			// control only
 			BlofeldParam.new(\bankMSB, nil, 0, (0..127)), //
@@ -522,7 +522,7 @@ BlofeldParam {
 	}
 }
 
-BlofeldGlobal : BlofeldParam {
+BlofeldGlobalParam : BlofeldParam {
 	*new { |name, sysex, control, values, defaultValue = 0|
 		^super.newCopyArgs(name, sysex, control, values, defaultValue, true);
 	}

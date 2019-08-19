@@ -32,6 +32,18 @@ BlofeldSound {
 		^super.newCopyArgs(bank, program, if (data == nil, { initData.copy }, { data }));
 	}
 
+	key {
+		^if (this.isEditBuffer, {
+			BlofeldEditBuffer.key(program);
+		}, {
+			Blofeld.key(bank, program);
+		});
+	}
+
+	isEditBuffer {
+		^(bank == BlofeldEditBuffer.editBufferBank);
+	}
+
 	init {
 		data = initData.copy;
 	}
@@ -42,9 +54,11 @@ BlofeldSound {
 				data[bParam.sysex] = bParam.rand;
 			});
 		});
+		this.setName("random");
+		this.setCategory(Blofeld.category[\init]);
 	}
 
-	getParam { |param|
+	get { |param|
 		var bParam = BlofeldParam.byName[param];
 		var value = if (bParam != nil, {
 			if (bParam.sysex != nil, { data[bParam.sysex] });
@@ -68,7 +82,7 @@ BlofeldSound {
 		^set;
 	}
 
-	randParam { |param|
+	rand { |param|
 		var bParam = BlofeldParam.byName[param];
 		var value = nil;
 		if (bParam != nil, {
@@ -79,8 +93,8 @@ BlofeldSound {
 	}
 
 	printInfo { |fullInfo = false|
-		this.printName();
-		this.printCategory();
+		this.getName().postln;
+		("category:" + this.getCategory()).postln;
 		this.printOsc("osc1", fullInfo);
 		this.printOsc("osc2", fullInfo);
 		this.printOsc("osc3", fullInfo);
@@ -130,19 +144,30 @@ BlofeldSound {
 		};
 	}
 
-	printName {
+	getName {
 		var name = "";
 		16.do { |i|
 			var bParam = BlofeldParam.paramSysex[i+363];
 			name = name ++ bParam.label(data[bParam.sysex]);
 		};
-		name.postln;
+		^name;
 	}
 
-	printCategory {
+	setName { |value|
+		16.do { |i|
+			var bParam = BlofeldParam.paramSysex[i+363];
+			data[bParam.sysex] = if (value[i] == nil, { 0 }, { value[i].ascii });
+		}
+	}
+
+	getCategory {
 		var bParam = BlofeldParam.paramSysex[379];
-		var name = "category:" + bParam.label(data[bParam.sysex]);
-		name.postln;
+		^bParam.label(data[bParam.sysex]);
+	}
+
+	setCategory { |value|
+		var bParam = BlofeldParam.paramSysex[379];
+		data[bParam.sysex] = value;
 	}
 
 	printOsc { |name, fullInfo = false|
@@ -189,14 +214,14 @@ BlofeldSound {
 	printEnv { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Mode").asSymbol);
 		msg = msg + this.getLabel((name++"Attack").asSymbol);
-		if (this.getParam((name++"AttackLevel").asSymbol) != 127, {
+		if (this.get((name++"AttackLevel").asSymbol) != 127, {
 			msg = msg + "(" ++ this.getLabel((name++"AttackLevel").asSymbol) ++ ")";
 		});
 		msg = msg + this.getLabel((name++"Decay").asSymbol);
 		msg = msg + this.getLabel((name++"Sustain").asSymbol);
 		msg = msg + this.getLabel((name++"Release").asSymbol);
 		if (fullInfo, {
-			if (this.getParam((name++"Mode").asSymbol) == Blofeld.envMode[\ads1ds2r], {
+			if (this.get((name++"Mode").asSymbol) == Blofeld.envMode[\ads1ds2r], {
 				msg = msg + "/";
 				msg = msg + this.getLabel((name++"Decay2").asSymbol);
 				msg = msg + this.getLabel((name++"Sustain2").asSymbol);

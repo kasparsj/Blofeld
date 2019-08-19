@@ -1,16 +1,4 @@
 Blofeld {
-	const sysexBegin = 0xF0;
-	const sysexEnd = 0xF7;
-	const waldorfID = 0x3E;
-	const blofeldID = 0x13;
-	const soundRequest = 0x00;
-	const globalRequest = 0x04;
-	const soundDump = 0x10;
-	const wavetableDump = 0x12;
-	const globalDump = 0x14;
-	const paramChange = 0x20;
-	const <editBuffer = 0x7F;
-
 	classvar <bank;
 	classvar <shape;
 	classvar <fBalance;
@@ -22,6 +10,7 @@ Blofeld {
 	classvar <glideMode;
 	classvar <filterType;
 	classvar <category;
+	classvar <catFilter;
 	classvar <effect1Type;
 	classvar <effect2Type;
 	classvar <fmSource;
@@ -41,13 +30,13 @@ Blofeld {
 	classvar <onOff;
 	classvar <noise;
 	classvar <ascii;
-	classvar <initSoundData;
 	classvar <numInstances = 0;
 
 	var <>deviceID;
+	var <callbacks;
 	var <sounds;
 	var <global;
-	var <callbacks;
+	var <editBuffer;
 	var <midiOut;
 
 	*initClass {
@@ -56,22 +45,22 @@ Blofeld {
 		this.initDictionaries();
 
 		Event.addEventType(\blofeld, { |server|
-			var sendGlobal = false;
+			var uploadGlobal = false;
 			currentEnvironment.keys.do({ |key|
 				var bParam = BlofeldParam.byName[key];
 				if (bParam != nil, {
 					if (bParam.isGlobal, {
-						~blofeld.setGlobalParam(key, currentEnvironment[key]);
-						sendGlobal = true;
+						~blofeld.global.set(key, currentEnvironment[key]);
+						uploadGlobal = true;
 					}, {
 						var chan = if (~chan == nil, { 0 }, { ~chan });
 						var useCache = if (~useCache == nil, { true }, { ~useCache });
-						~blofeld.setParam(key, currentEnvironment[key], chan, useCache);
+						~blofeld.editBuffer.set(key, currentEnvironment[key], chan, useCache);
 					});
 				});
 			});
-			if (sendGlobal, {
-				~blofeld.sendGlobal();
+			if (uploadGlobal, {
+				~blofeld.global.upload();
 			});
 			if  (~midicmd != nil, {
 				if (~midiout == nil, { ~midiout = ~blofeld.midiOut; });
@@ -81,12 +70,19 @@ Blofeld {
 	}
 
 	*new { |deviceID = 0|
-		var instance = super.newCopyArgs(deviceID, (), Int8Array.new, ());
-		if (numInstances == 0, {
-			instance.makeDefault();
-		});
+		var instance = super.newCopyArgs(deviceID, ());
 		numInstances = numInstances + 1;
+		instance.init();
 		^instance;
+	}
+
+	init {
+		sounds = BlofeldSoundSet.new(this);
+		global = BlofeldGlobal.new(this);
+		editBuffer = BlofeldEditBuffer.new(this);
+		if (Blofeld.numInstances == 1, {
+			this.makeDefault();
+		});
 	}
 
 	connect { |deviceName, portName, forceInit = false|
@@ -99,75 +95,11 @@ Blofeld {
 		// 	});
 		// });
 		MIDIIn.connectAll;
-		MIDIIn.addFuncTo(\sysex, {|src, sysex| this.parseSysex(sysex); });
 		midiOut = MIDIOut.newByName(deviceName, portName);
 	}
 
 	makeDefault {
 		Event.addParentType(\blofeld, (blofeld: this));
-	}
-
-	parseSysex { |packet|
-		switch (packet[4],
-			soundDump, {
-				var bank = packet[5];
-				var program = packet[6];
-				var key = this.getKey(bank, program);
-				var sound = this.getOrCreateSound(bank, program);
-				sound.data = packet[7..389];
-				if (callbacks[key] != nil, {
-					callbacks[key].value(sound);
-					callbacks.removeAt(key);
-				});
-			},
-			globalDump, {
-				global = packet[5..76];
-				if (callbacks[\global] != nil, {
-					callbacks[\global].value;
-					callbacks.removeAt(\global);
-				});
-			}
-		);
-	}
-
-	getOrCreateSound { |bank = 0x7F, program = 0x00|
-		var key = this.getKey(bank, program);
-		var sound = sounds[key];
-		if (sound == nil, {
-			sound = this.createSound(bank, program);
-		});
-		^sound;
-	}
-
-	getSound { |bank = 0x7F, program = 0x00|
-		^sounds[this.getKey(bank, program)];
-	}
-
-	createSound { |bank = 0x7F, program = 0x00|
-		var key = this.getKey(bank, program);
-		var sound = BlofeldSound.new(bank, program);
-		sounds.put(key, sound);
-		^sound;
-	}
-
-	removeSound { |bank, program|
-		var key = this.getKey(bank, program);
-		sounds.removeAt(key);
-	}
-
-	clearEditBuffer { |parts = 0|
-		if (parts.isArray, {
-			parts.do { |part|
-				this.removeSound(editBuffer, part);
-			};
-		}, {
-			this.removeSound(editBuffer, parts);
-		});
-	}
-
-	getKey { |bank = 0x7F, program = 0x00|
-		var key = "b" ++ bank.asHexString(2) ++ "p" ++ program.asHexString(2);
-		^key.asSymbol;
 	}
 
 	noteOn { |note = 60, veloc = 64, chan = 0|
@@ -180,275 +112,68 @@ Blofeld {
 
 	selectSound { |bank, program, chan = 0|
 		this.setBank(bank, chan);
-		this.setProgram(program, chan);
+		this.program(program, chan);
 	}
 
-	requestSound { |callback = nil, bank = 0x7F, program = 0x00|
-		if (callback != nil, {
-			var key = this.getKey(bank, program);
-			callbacks.put(key, callback);
-		});
-		midiOut.sysex(this.soundRequestPacket(bank, program));
+	download { |obj, callback = nil|
+		switch (obj.class,
+			BlofeldSound, {
+				if (obj.isEditBuffer, {
+					editBuffer.download(callback, obj.program);
+				}, {
+					sounds.download(obj, callback);
+				});
+			},
+			BlofeldSoundSet, {
+				obj.blofeld = this;
+				obj.downloadAll(callback);
+			},
+			BlofeldGlobal, {
+				obj.download(callback);
+			}
+		);
 	}
 
-	initSound { |bank = 0x7F, program = 0x00|
-		var sound = this.createSound(bank, program);
-		midiOut.sysex(this.soundDumpPacket(sound));
-	}
-
-	randomizeSound { |group = \sysex, bank = 0x7F, program = 0x00|
-		var sound = this.getOrCreateSound(bank, program);
-		sound.randomize(group);
-		midiOut.sysex(this.soundDumpPacket(sound));
+	upload { |obj, callback = nil|
+		switch (obj.class,
+			BlofeldSound, {
+				if (obj.isEditBuffer, {
+					editBuffer.upload(obj);
+				}, {
+					sounds.upload(obj);
+				});
+			},
+			BlofeldWavetable, {
+				obj.upload(midiOut, deviceID);
+			},
+			BlofeldGlobal, {
+				obj.upload(callback);
+			}
+		);
 	}
 
 	setBank { |bank, chan = 0|
-		this.setControlParam(\bankLSB, bank, chan);
+		this.control(\bankLSB, bank, chan);
 		//if (this.multiMode.asBoolean, {
 		//	this.setControlParam(\bankMSB, 127, chan);
 		//});
 	}
 
-	setProgram { |num, chan = 0|
+	program { |num, chan = 0|
 		midiOut.program(chan, num);
-		sounds.removeAt(this.getKey());
+		editBuffer.clear;
 	}
 
-	getParam { |param, location = 0|
-		var sound = this.getSound(editBuffer, location);
-		var value = if (sound != nil, { sound.getParam(param) }, { nil });
-		^value;
-	}
-
-	setParam { |param, value = 0, location = 0, useCache = false|
-		var bParam = BlofeldParam.byName[param];
-		var sound = this.getSound(editBuffer, location);
-		var sendValue = useCache.not;
-		if (bParam == nil, {
-			Error("Invalid param %".format(param)).throw;
-		});
-		if (bParam.sysex == nil, {
-			Error("For global or control params use setGlobalParam or setControlParam").throw;
-		});
-		value = value.asInteger.min(127).max(0);
-		sendValue = (sendValue || if (sound == nil, { true }, { sound.data[bParam.sysex] != value }));
-		if (sendValue, {
-			if (bParam.control != nil, {
-				midiOut.control(location, bParam.control, value);
-			}, {
-				midiOut.sysex(this.paramChangePacket(bParam, value, location));
-			});
-		});
-		if (sound != nil, {
-			sound.data[bParam.sysex] = value;
-		}, {
-			if (useCache, {
-				this.createSound(editBuffer, location).data[bParam.sysex] = value;
-			});
-		});
-	}
-
-	requestGlobal { |callback = nil|
-		if (callback != nil, {
-			callbacks.put(\global, callback);
-		});
-		midiOut.sysex(this.globalRequestPacket());
-	}
-
-	sendGlobal {
-		midiOut.sysex(this.globalDumpPacket());
-	}
-
-	getGlobalParam { |param|
-		var bParam = BlofeldParam.byName[param];
-		var value = if (bParam != nil && bParam.sysex != nil, { global[bParam.sysex] }, { nil });
-		^value;
-	}
-
-	setGlobalParam { |param, value = 0, sendGlobal = false|
-		var bParam = BlofeldParam.byName[param];
-		value = value.asInteger.min(127).max(0);
-		if (bParam != nil && bParam.sysex != nil, {
-			global[bParam.sysex] = value;
-			if (sendGlobal, {
-				this.sendGlobal();
-			});
-		});
-	}
-
-	setControlParam { |param, value, chan = 0|
+	control { |param, value, chan = 0|
 		var bParam = BlofeldParam.byName[param];
 		if (bParam != nil && bParam.control != nil, {
 			midiOut.control(chan, bParam.control, value.asInteger.min(127).max(0));
 		});
 	}
 
-	multiMode { |value = nil, sendGlobal = true|
-		var bParam = BlofeldParam.byName[\multiMode];
-		value = if (value != nil, {
-			//this.setGlobalParam(\multiMode, value, sendGlobal);
-			Error("Multimode needs to be switched on manually").throw;
-		}, {
-			global[bParam.sysex];
-		});
-		^value;
-	}
-
-	catFilter { |value = nil, sendGlobal = true|
-		var bParam = BlofeldParam.byName[\catFilter];
-		value = if (value != nil, {
-			this.setGlobalParam(\catFilter, value+1, sendGlobal);
-		}, {
-			global[bParam.sysex];
-		});
-		^value;
-	}
-
-	createWavetable { |levels, times, curve = 'lin'|
-		var signal = Signal.newClear;
-		64.do { |wave|
-			signal = signal ++ Env(levels.value(wave), times.value(wave), curve.value(wave)).asSignal(128);
-		};
-		^signal;
-	}
-
-	sendWavetable { |slot, signal, name|
-		var mult = 1;
-		if (slot < 80 || slot > 118, {
-			Error("Slot must be between 80 and 118.").throw;
-		});
-		if ((signal.size % 128) != 0, {
-			Error("Signal must have multitude of power of 2 of 128 samples").throw;
-		}, {
-			if (signal.size < (128*64), {
-				var div = signal.size / 128;
-				var times = 6;
-				while ({ div % 2 == 0 }, {
-					div = div / 2;
-					times = times - 1;
-				});
-				if (div != 1, {
-					Error("Signal must have multitude of power of 2 of 128 samples").throw;
-				});
-				times.do {
-					signal = signal ++ signal;
-				};
-			}, {
-				mult = (signal.size / (128*64)).asInteger;
-			});
-		});
-		if (name.size > 14, {
-			Error("Name must be less than 14 ASCII characters long.").throw;
-		});
-		64.do({ |i|
-			midiOut.sysex(this.wavetableDumpPacket(slot, signal[(128*i*mult)..(128*(i+1)*mult-1)], name.ascii, i, mult));
-		});
-	}
-
-	soundRequestPacket { |bank, program|
-		var packet = Int8Array.new();
-		packet = packet.add(sysexBegin);
-		packet = packet.add(waldorfID);
-		packet = packet.add(blofeldID);
-		packet = packet.add(deviceID);
-		packet = packet.add(soundRequest);
-		packet = packet.add(bank);
-		packet = packet.add(program);
-		packet = packet.add(sysexEnd);
-		^packet;
-	}
-
-	soundDumpPacket { |sound|
-		var packet = Int8Array.new();
-		packet = packet.add(sysexBegin);
-		packet = packet.add(waldorfID);
-		packet = packet.add(blofeldID);
-		packet = packet.add(deviceID);
-		packet = packet.add(soundDump);
-		packet = packet.add(sound.bank);
-		packet = packet.add(sound.program);
-		packet = packet.addAll(sound.data);
-		packet = packet.add(this.checksum(sound.data));
-		packet = packet.add(sysexEnd);
-		^packet;
-	}
-
-	paramChangePacket { |param, value, location = 0|
-		var packet = Int8Array.new();
-		packet = packet.add(sysexBegin);
-		packet = packet.add(waldorfID);
-		packet = packet.add(blofeldID);
-		packet = packet.add(deviceID);
-		packet = packet.add(paramChange);
-		packet = packet.add(location);
-		packet = packet.add(param.sysex / 128);
-		packet = packet.add(param.sysex % 128);
-		packet = packet.add(value);
-		packet = packet.add(sysexEnd);
-		^packet;
-	}
-
-	globalRequestPacket {
-		var packet = Int8Array.new();
-		packet = packet.add(sysexBegin);
-		packet = packet.add(waldorfID);
-		packet = packet.add(blofeldID);
-		packet = packet.add(deviceID);
-		packet = packet.add(globalRequest);
-		packet = packet.add(sysexEnd);
-		^packet;
-	}
-
-	globalDumpPacket {
-		var packet = Int8Array.new();
-		packet = packet.add(sysexBegin);
-		packet = packet.add(waldorfID);
-		packet = packet.add(blofeldID);
-		packet = packet.add(deviceID);
-		packet = packet.add(globalDump);
-		packet = packet.addAll(global);
-		packet = packet.add(this.checksum(global));
-		packet = packet.add(sysexEnd);
-		^packet;
-	}
-
-	wavetableDumpPacket { |slot, samples, ascii, wave, mult = 1|
-		var packet = Int8Array.new();
-		packet = packet.add(sysexBegin);
-		packet = packet.add(waldorfID);
-		packet = packet.add(blofeldID);
-		packet = packet.add(deviceID);
-		packet = packet.add(wavetableDump);
-		packet = packet.add(0x50 + (slot - 80));
-		packet = packet.add(wave & 0x7F);
-		packet = packet.add(0x00); // format
-		128.do({ |i|
-			var sample = (samples[i*mult] * 1048575).asInteger;
-			// packet = packet.add((sample >> 14) & 0x7f);
-			// packet = packet.add((sample >> 7) & 0x7f);
-			// packet = packet.add((sample) & 0x7f);
-			if (sample < 0, {
-				packet = packet.add((sample & 0x000FC000) >> 14 + 0x40);
-				}, {
-					packet = packet.add((sample & 0x000FC000) >> 14);
-			});
-			packet = packet.add((sample & 0x00003F80) >> 7);
-			packet = packet.add((sample & 0x0000007F));
-		});
-		14.do({ |i|
-			var char = if(ascii[i] != nil, { ascii[i] & 0x7f }, { 0x00 });
-			packet = packet.add(char);
-		});
-		packet = packet.add(0x00); // reserved
-		packet = packet.add(0x00); // reserved
-		packet = packet.add(this.checksum(packet[7..407]));
-		packet = packet.add(sysexEnd);
-		^packet;
-	}
-
-	checksum { |data|
-		var csum = data.sum & 0x7F;
-		^csum;
+	*key { |bank = 0x7F, program = 0x00|
+		var key = this.bank.findKeyForValue(bank) ++ program;
+		^key.asSymbol;
 	}
 
 	*initDictionaries {
@@ -565,6 +290,22 @@ Blofeld {
 			perc: 10,
 			poly: 11,
 			seq: 12,
+		);
+		catFilter = (
+			off: 0,
+			init: 1,
+			arp: 2,
+			atmp: 3,
+			bass: 4,
+			drum: 5,
+			fx: 6,
+			keys: 7,
+			lead: 8,
+			mono: 9,
+			pad: 10,
+			perc: 11,
+			poly: 12,
+			seq: 13,
 		);
 		filterType = (
 			bypass:0,
