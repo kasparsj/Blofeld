@@ -116,6 +116,10 @@ Blofeld {
 		this.program(program, chan);
 	}
 
+	selectRandomSound {
+		this.selectSound(rrand(0, Blofeld.bank.size-1), rrand(0, 127));
+	}
+
 	download { |obj, callback = nil|
 		switch (obj.class,
 			BlofeldSound, {
@@ -165,7 +169,7 @@ Blofeld {
 		editBuffer.clear;
 	}
 
-	control { |param, value, chan = 0|
+	control { |param, value = 0, chan = 0|
 		var bParam = BlofeldParam.byName[param];
 		if (bParam != nil && bParam.control != nil, {
 			midiOut.control(chan, bParam.control, value.asInteger.min(127).max(0));
