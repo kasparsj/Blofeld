@@ -5,6 +5,7 @@ BlofeldGui {
 	var <body;
 	var <categoriesMenu;
 	var <soundsetsMenu;
+	var <searchInput;
 	var <keyboard;
 	var <footer1, <footer2;
 	var <currentSoundText;
@@ -21,6 +22,7 @@ BlofeldGui {
 	var <numPages = 1;
 	var <buttonArray;
 	var <soundsArray;
+	var <searchText = "";
 
 	const windowWidth = 960;
 	const windowHeight = 480;
@@ -140,6 +142,14 @@ BlofeldGui {
 			initAction: false, // because buttonArray does not exist yet
 			labelWidth: 60,
 		);
+
+		searchInput = TextField.new(header, Rect(400, 10, 185, 30))
+		.string_(searchText).action_({
+			searchText = searchInput.string;
+			currentPage = 1;
+			this.reloadSounds;
+			this.updatePages;
+		});
 	}
 
 	reloadSounds {
@@ -153,7 +163,8 @@ BlofeldGui {
 		soundsArray = Array.newClear(50);
 		currentSounds = soundsCache.select({ |sound|
 			var accept = (sound.get(\category) == (if (currentCategory != \all, { Blofeld.category[currentCategory.asSymbol] }, { sound.get(\category) }))) &&
-			(sound.soundset.name == (if (currentSoundset != \all, { currentSoundset.asSymbol }, { sound.soundset.name })));
+			(sound.soundset.name == (if (currentSoundset != \all, { currentSoundset.asSymbol }, { sound.soundset.name }))) &&
+			(if (searchText.size > 0, { sound.getName().containsi(searchText) }, { true }));
 			if (accept, {
 				if ((totalCount >= (50*(currentPage-1))) && (count < (50*currentPage)), {
 					count = count + 1;
