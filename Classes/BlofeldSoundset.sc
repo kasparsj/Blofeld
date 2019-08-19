@@ -25,7 +25,7 @@ BlofeldSoundset {
 
 	*loadAll {
 		files.keys.do { |key|
-			loaded.put(key, this.load(files[key]));
+			this.load(files[key]);
 		};
 	}
 
@@ -70,6 +70,7 @@ BlofeldSoundset {
 			};
 		});
 		obj.name = files.findKeyForValue(path) ?? path.basename.asSymbol;
+		loaded.put(obj.name, obj);
 		^obj;
 	}
 
@@ -77,17 +78,17 @@ BlofeldSoundset {
 		var selected = [];
 		loaded.do { |soundset|
 			selected = selected ++ soundset.sounds.select { |sound|
-				function.value(sound, soundset);
+				function.value(sound);
 			};
 		};
 		^selected;
 	}
 
-	*new { |blofeld = nil, sounds = nil|
+	*new { |blofeld = nil, sounds = nil, name = nil|
 		if (sounds.isCollection.not, {
 			sounds = ();
 		});
-		^super.newCopyArgs(blofeld, sounds);
+		^super.newCopyArgs(blofeld, sounds, name);
 	}
 
 	getOrCreate { |bank, program|
@@ -114,10 +115,12 @@ BlofeldSoundset {
 
 	add { |sound|
 		sounds.put(sound.key, sound);
+		sound.soundset = this;
 	}
 
 	remove { |bank, program|
 		var key = Blofeld.key(bank, program);
+		sounds[key].soundset = nil;
 		sounds.removeAt(key);
 	}
 

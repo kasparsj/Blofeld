@@ -4,6 +4,7 @@ BlofeldSound {
 	var <>bank;
 	var <>program;
 	var <>data;
+	var <>soundset;
 
 	*initClass {
 		initData = Int8Array.newFrom([
@@ -28,8 +29,8 @@ BlofeldSound {
                    32, 32, 32, 32, 32, 0, 0, 0, 0]);
 	}
 
-	*new { |bank, program, data = nil|
-		^super.newCopyArgs(bank, program, if (data == nil, { initData.copy }, { data }));
+	*new { |bank, program, data = nil, soundset = nil|
+		^super.newCopyArgs(bank, program, if (data == nil, { initData.copy }, { data }), soundset);
 	}
 
 	key {
@@ -94,6 +95,7 @@ BlofeldSound {
 
 	getInfo { |fullInfo = false|
 		var info = this.getName() ++ "\n" ++
+		(if (soundset != nil, {"soundset:" + soundset.name.asString ++ "\n"}, { "" })) ++
 		("category:" + this.getCategory()) ++ "\n" ++
 		this.getOscInfo("osc1", fullInfo) ++ "\n" ++
 		this.getOscInfo("osc2", fullInfo) ++ "\n" ++

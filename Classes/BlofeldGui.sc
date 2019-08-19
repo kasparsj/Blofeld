@@ -36,6 +36,7 @@ BlofeldGui {
 	classvar <buttonWidth;
 	classvar <buttonHeight;
 	classvar <backgrounds;
+	classvar <soundsCache;
 
 	*initClass {
 		Class.initClassTree(Blofeld);
@@ -55,10 +56,13 @@ BlofeldGui {
 		);
 	}
 
-	*new { |blofeld|
+	*new { |blofeld, updateCache = true|
 		banks = [\all] ++ Blofeld.bank.keys.asArray.sort;
 		categories = [\all] ++ Blofeld.category.values.sort.collect({ |v| Blofeld.category.findKeyForValue(v); });
 		soundsets = [\all] ++ BlofeldSoundset.loaded.keys.asArray.sort;
+		if (updateCache, {
+			soundsCache = BlofeldSoundset.select(true).sort {|a, b| a.getName() < b.getName() };
+		});
 		^super.newCopyArgs(blofeld).init();
 	}
 
@@ -147,9 +151,9 @@ BlofeldGui {
 			//button.background = nil;
 		});
 		soundsArray = Array.newClear(50);
-		currentSounds = BlofeldSoundset.select({ |sound, soundset|
+		currentSounds = soundsCache.select({ |sound|
 			var accept = (sound.get(\category) == (if (currentCategory != \all, { Blofeld.category[currentCategory.asSymbol] }, { sound.get(\category) }))) &&
-			(soundset.name == (if (currentSoundset != \all, { currentSoundset.asSymbol }, { soundset.name })));
+			(sound.soundset.name == (if (currentSoundset != \all, { currentSoundset.asSymbol }, { sound.soundset.name })));
 			if (accept, {
 				if ((totalCount >= (50*(currentPage-1))) && (count < (50*currentPage)), {
 					count = count + 1;
@@ -192,8 +196,8 @@ BlofeldGui {
 			)
 			.action_({ |button|
 				if (button.string.size > 0, {
-					currentSoundText.string = button.string;
 					currentSound = soundsArray[buttonArray.indexOf(button)];
+					currentSoundText.string = button.string;
 					currentSoundInfoText.string = currentSound.getInfo();
 					blofeld.editBuffer.upload(currentSound);
 				});
