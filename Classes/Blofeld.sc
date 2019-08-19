@@ -103,6 +103,10 @@ Blofeld {
 		Event.addParentType(\blofeld, (blofeld: this));
 	}
 
+	gui {
+		BlofeldGui.new(this);
+	}
+
 	noteOn { |note = 60, veloc = 64, chan = 0|
 		midiOut.noteOn(chan, note, veloc);
 	}
@@ -284,7 +288,7 @@ Blofeld {
 		category = (
 			init: 0,
 			arp: 1,
-			atmp: 2,
+			atmo: 2,
 			bass: 3,
 			drum: 4,
 			fx: 5,

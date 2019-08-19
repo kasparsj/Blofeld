@@ -92,56 +92,65 @@ BlofeldSound {
 		^value;
 	}
 
-	printInfo { |fullInfo = false|
-		this.getName().postln;
-		("category:" + this.getCategory()).postln;
-		this.printOsc("osc1", fullInfo);
-		this.printOsc("osc2", fullInfo);
-		this.printOsc("osc3", fullInfo);
-		this.printFilter("filter1", fullInfo);
-		this.printFilter("filter2", fullInfo);
-		this.printParams([\filterRouting]);
-		this.printAmp(fullInfo);
-		this.printEnv("filterEnv", fullInfo);
-		this.printEnv("ampEnv", fullInfo);
-		this.printEnv("env3", fullInfo);
-		this.printEnv("env4", fullInfo);
+	getInfo { |fullInfo = false|
+		var info = this.getName() ++ "\n" ++
+		("category:" + this.getCategory()) ++ "\n" ++
+		this.getOscInfo("osc1", fullInfo) ++ "\n" ++
+		this.getOscInfo("osc2", fullInfo) ++ "\n" ++
+		this.getOscInfo("osc3", fullInfo) ++ "\n" ++
+		this.getFilterInfo("filter1", fullInfo) ++ "\n" ++
+		this.getFilterInfo("filter2", fullInfo) ++ "\n";
+		this.getParamInfo([\filterRouting]) ++
+		this.getAmpInfo(fullInfo) ++ "\n" ++
+		this.getEnvInfo("filterEnv", fullInfo) ++ "\n" ++
+		this.getEnvInfo("ampEnv", fullInfo) ++ "\n" ++
+		this.getEnvInfo("env3", fullInfo) ++ "\n" ++
+		this.getEnvInfo("env4", fullInfo) ++ "\n";
 		3.do { |i|
-			this.printLfo("lfo"++(i+1), fullInfo);
+			info = info ++ this.getLfoInfo("lfo"++(i+1), fullInfo) ++ "\n";
 		};
 		2.do { |i|
 			if (this.isSet(("effect"++(i+1)++"Mix").asSymbol), {
-				this.printEffect("effect"++(i+1), fullInfo);
+				info = info ++ this.getEffectInfo("effect"++(i+1), fullInfo) ++ "\n";
 			});
 		};
 		16.do { |i|
 			if (this.isSet(("modulation"++(i+1)++"Amount").asSymbol), {
-				this.printModulation("modulation"++(i+1), fullInfo);
+				info = info ++ this.getModulationInfo("modulation"++(i+1), fullInfo) ++ "\n";
 			});
 		};
 		4.do { |i|
 			if (this.isSet(("modifier"++(i+1)++"SourceA").asSymbol), {
-				this.printModifier("modifier"++(i+1), fullInfo);
+				info = info ++ this.getModifierInfo("modifier"++(i+1), fullInfo) ++ "\n";
 			});
 		};
-		this.printArpeggiator(fullInfo);
-		this.printParams(BlofeldParam.paramSysex.collect({ |bParam|
+		if (this.isSet(\arpMode), {
+			info = info ++ this.getArpeggiatorInfo(fullInfo) ++ "\n";
+		});
+		this.getParamInfo(BlofeldParam.paramSysex.collect({ |bParam|
 			var skip = bParam.isOsc || bParam.isFilter || bParam.isAmplifier || bParam.isLfo || bParam.isEnvelope || bParam.isCategory || bParam.isName || bParam.isEffect || bParam.isArpeggiator || bParam.isModulation || bParam.isModifier;
 			if (skip.not, {
 				bParam.name;
 			});
 		}));
+		^info;
 	}
 
-	printParams { |params|
+	printInfo { |fullInfo = false|
+		this.getInfo(fullInfo).postln;
+	}
+
+	getParamInfo { |params|
+		var info = "";
 		params.do { |param|
 			var bParam = BlofeldParam.byName[param];
 			if (bParam != nil, {
 				if (bParam.sysex != nil && bParam.isSet(data), {
-					((bParam.name.asString ++ ":") + bParam.label(data[bParam.sysex])).postln;
+					info = info ++ ((bParam.name.asString ++ ":") + bParam.label(data[bParam.sysex])) ++ "\n";
 				});
 			});
 		};
+		^info;
 	}
 
 	getName {
@@ -170,48 +179,48 @@ BlofeldSound {
 		data[bParam.sysex] = value;
 	}
 
-	printOsc { |name, fullInfo = false|
+	getOscInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Shape").asSymbol);
 		msg = msg + this.getLabel((name++"Octave").asSymbol);
 		msg = msg + this.getLabel((name++"Semitone").asSymbol);
 		msg = msg + this.getLabel((name++"Detune").asSymbol);
 		msg = msg + this.getLabel((name++"Level").asSymbol);
 		msg = msg + this.getLabel((name++"Balance").asSymbol);
-		msg.postln;
 		if (fullInfo, {
-			this.printParams([(name++"Pulsewidth").asSymbol, (name++"PWMSource").asSymbol, (name++"PWAmount").asSymbol, (name++"LimitWT").asSymbol, (name++"Brilliance").asSymbol, (name++"FMSource").asSymbol, (name++"FMAmount").asSymbol, (name++"Keytrack").asSymbol, (name++"BendRange").asSymbol]);
+			msg = msg + this.printParams([(name++"Pulsewidth").asSymbol, (name++"PWMSource").asSymbol, (name++"PWAmount").asSymbol, (name++"LimitWT").asSymbol, (name++"Brilliance").asSymbol, (name++"FMSource").asSymbol, (name++"FMAmount").asSymbol, (name++"Keytrack").asSymbol, (name++"BendRange").asSymbol]);
 		});
+		^msg;
 	}
 
-	printFilter { |name, fullInfo = false|
+	getFilterInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Type").asSymbol);
 		msg = msg + this.getLabel((name++"Cutoff").asSymbol);
 		msg = msg + this.getLabel((name++"Resonance").asSymbol);
 		msg = msg + this.getLabel((name++"EnvAmount").asSymbol);
-		msg.postln;
 		if (fullInfo, {
-			this.printParams([(name++"Drive").asSymbol, (name++"DriveCurve").asSymbol, (name++"Keytrack").asSymbol, (name++"EnvVelocity").asSymbol, (name++"ModSource").asSymbol, (name++"ModAmount").asSymbol, (name++"FMSource").asSymbol, (name++"FMAmount").asSymbol, (name++"Pan").asSymbol, (name++"PanSource").asSymbol, (name++"PanAmount").asSymbol]);
+			msg = msg + this.printParams([(name++"Drive").asSymbol, (name++"DriveCurve").asSymbol, (name++"Keytrack").asSymbol, (name++"EnvVelocity").asSymbol, (name++"ModSource").asSymbol, (name++"ModAmount").asSymbol, (name++"FMSource").asSymbol, (name++"FMAmount").asSymbol, (name++"Pan").asSymbol, (name++"PanSource").asSymbol, (name++"PanAmount").asSymbol]);
 		});
+		^msg;
 	}
 
-	printAmp { |fullInfo = false|
+	getAmpInfo { |fullInfo = false|
 		var msg = "amp:" + this.getLabel(\ampVolume) + this.getLabel(\ampVelocity);
-		msg.postln;
 		if (fullInfo, {
-			this.printParams([\ampModSource, \ampModAmount]);
+			msg = msg + this.printParams([\ampModSource, \ampModAmount]);
 		});
+		^msg;
 	}
 
-	printLfo { |name, fullInfo = false|
+	getLfoInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Shape").asSymbol);
 		msg = msg + this.getLabel((name++"Speed").asSymbol);
-		msg.postln;
 		if (fullInfo, {
-			this.printParams([(name++"Sync").asSymbol, (name++"Clocked").asSymbol, (name++"StartPhase").asSymbol, (name++"Keytrack").asSymbol, (name++"Delay").asSymbol, (name++"Fade").asSymbol]);
+			msg = msg + this.printParams([(name++"Sync").asSymbol, (name++"Clocked").asSymbol, (name++"StartPhase").asSymbol, (name++"Keytrack").asSymbol, (name++"Delay").asSymbol, (name++"Fade").asSymbol]);
 		});
+		^msg;
 	}
 
-	printEnv { |name, fullInfo = false|
+	getEnvInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Mode").asSymbol);
 		msg = msg + this.getLabel((name++"Attack").asSymbol);
 		if (this.get((name++"AttackLevel").asSymbol) != 127, {
@@ -227,44 +236,44 @@ BlofeldSound {
 				msg = msg + this.getLabel((name++"Sustain2").asSymbol);
 			});
 		});
-		msg.postln;
+		^msg;
 	}
 
-	printEffect { |name, fullInfo = false|
+	getEffectInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Type").asSymbol);
 		msg = msg + this.getLabel((name++"Mix").asSymbol);
-		msg.postln;
 		if (fullInfo, {
 			var names = 14.collect({|i| (name++"Param"++(i+1)).asSymbol });
-			this.printParams(names);
+			msg = msg + this.printParams(names);
 		});
+		^msg;
 	}
 
-	printModulation { |name, fullInfo = false|
+	getModulationInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"Src").asSymbol);
 		msg = msg + "->" + this.getLabel((name++"Amount").asSymbol);
 		msg = msg + "->" + this.getLabel((name++"Dst").asSymbol);
-		msg.postln;
+		^msg;
 	}
 
-	printModifier { |name, fullInfo = false|
+	getModifierInfo { |name, fullInfo = false|
 		var msg = (name ++ ":") + this.getLabel((name++"SourceA").asSymbol);
 		msg = msg + "->" + this.getLabel((name++"Operation").asSymbol);
 		msg = msg + "<-" + this.getLabel((name++"SourceB").asSymbol);
-		msg.postln;
+		^msg;
 	}
 
-	printArpeggiator { |fullInfo = false|
+	getArpeggiatorInfo { |fullInfo = false|
 		var name = "arp";
 		var msg = (name ++ ":") + this.getLabel((name++"Mode").asSymbol);
 		msg = msg + this.getLabel((name++"Clock").asSymbol);
 		msg = msg + this.getLabel((name++"Tempo").asSymbol);
 		msg = msg + this.getLabel((name++"Pattern").asSymbol);
 		msg = msg + this.getLabel((name++"Direction").asSymbol);
-		msg.postln;
 		if (fullInfo, {
-			this.printParams([(name++"Octave").asSymbol, (name++"Length").asSymbol, (name++"SortOrder").asSymbol, (name++"TimingFactor").asSymbol, (name++"Velocity").asSymbol, (name++"PtnReset").asSymbol, (name++"ptnLength").asSymbol]);
+			msg = msg + this.printParams([(name++"Octave").asSymbol, (name++"Length").asSymbol, (name++"SortOrder").asSymbol, (name++"TimingFactor").asSymbol, (name++"Velocity").asSymbol, (name++"PtnReset").asSymbol, (name++"ptnLength").asSymbol]);
 		});
+		^msg;
 	}
 }
 

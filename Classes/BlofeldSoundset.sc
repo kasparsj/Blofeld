@@ -6,6 +6,7 @@ BlofeldSoundset {
 
 	var <blofeld;
 	var <sounds;
+	var <>name;
 
 	*initClass {
 		var sep = thisProcess.platform.pathSeparator;
@@ -68,6 +69,7 @@ BlofeldSoundset {
 				});
 			};
 		});
+		obj.name = files.findKeyForValue(path) ?? path.basename.asSymbol;
 		^obj;
 	}
 
@@ -75,7 +77,7 @@ BlofeldSoundset {
 		var selected = [];
 		loaded.do { |soundset|
 			selected = selected ++ soundset.sounds.select { |sound|
-				function.value(sound);
+				function.value(sound, soundset);
 			};
 		};
 		^selected;
@@ -102,7 +104,7 @@ BlofeldSoundset {
 		^sounds[Blofeld.key(bank, program)];
 	}
 
-	random { |category = nil|
+	choose { |category = nil|
 		var set = sounds;
 		if (category != nil, {
 			set = set.select({|s| s.get(\category) == category })
