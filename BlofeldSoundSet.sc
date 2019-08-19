@@ -87,17 +87,48 @@ BlofeldSoundSet {
 	}
 
 	downloadAll { |callback = nil|
-		Blofeld.bank.values.sort.do { |b|
-			128.do { |i|
-				BlofeldSysex.soundDumpCallback.put(Blofeld.key(b, i), this.expect(callback));
-			}
-		};
-		blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(allSoundsBank, 0x00, blofeld.deviceID));
+		var r = Routine({
+			Blofeld.bank.values.sort.do { |b|
+				128.do { |i|
+					BlofeldSysex.soundDumpCallback.put(Blofeld.key(b, i), this.expect(callback));
+				}
+			};
+			blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(allSoundsBank, 0x00, blofeld.deviceID));
+			(Blofeld.bank.size*128).wait;
+			if (callback != nil, { callback.value });
+		});
+		r.play;
+		^r;
 	}
 
 	upload { |sound, callback = nil|
-		blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
-		this.add(sound);
+		var r = Routine({
+			blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
+			this.add(sound);
+			if (callback != nil, {
+				1.wait;
+				callback.value;
+			});
+		});
+		r.play;
+		^r;
+	}
+
+	uploadAll { |callback = nil|
+		var r = Routine({
+			Blofeld.bank.values.sort.do { |b|
+				128.do { |i|
+					var sound = get(b, i);
+					if (sound != nil, {
+						this.upload(sound);
+						1.wait;
+					});
+				};
+			};
+			if (callback != nil, { callback.value });
+		});
+		r.play;
+		^r;
 	}
 
 	expect { |callback = nil|

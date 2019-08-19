@@ -49,18 +49,26 @@ BlofeldEditBuffer {
 		blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(editBufferBank, location, blofeld.deviceID));
 	}
 
-	upload { |sound|
-		blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
+	upload { |sound, callback = nil, location = 0|
+		var r = Routine({
+			sound.bank = editBufferBank;
+			sound.program = location;
+			blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
+			1.wait;
+			if (callback != nil, { callback.value });
+		});
+		r.play;
+		^r;
 	}
 
-	init { |location = 0|
+	init { |callback = nil, location = 0|
 		this.getOrCreatePart(location).init();
-		this.upload(parts[location]);
+		^this.upload(parts[location], callback, location);
 	}
 
-	randomize { |location = 0, group = \sysex|
+	randomize { |callback, location = 0, group = \sysex|
 		this.getOrCreatePart(location).randomize(group);
-		this.upload(parts[location]);
+		^this.upload(parts[location], callback, location);
 	}
 
 	getPart { |location = 0|
