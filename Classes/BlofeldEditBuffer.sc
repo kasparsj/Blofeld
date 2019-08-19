@@ -48,16 +48,20 @@ BlofeldEditBuffer {
 		blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(editBufferBank, location, blofeld.deviceID));
 	}
 
-	upload { |sound, callback = nil, location = 0|
-		var r = Routine({
-			sound.bank = editBufferBank;
-			sound.program = location;
-			blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
-			1.wait;
-			if (callback != nil, { callback.value });
+	upload { |sounds, callback = nil, location = 0|
+		if (sounds.isArray.not, {
+			sounds = [sounds];
 		});
-		r.play;
-		^r;
+		^Routine({
+			sounds.do { |sound, i|
+				sound = sound.copy;
+				sound.bank = editBufferBank;
+				sound.program = location + i;
+				blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
+				1.wait;
+			};
+			if (callback != nil, { callback.value });
+		}).play;
 	}
 
 	init { |callback = nil, location = 0|

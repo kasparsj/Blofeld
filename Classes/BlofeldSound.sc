@@ -95,7 +95,10 @@ BlofeldSound {
 
 	getInfo { |fullInfo = false|
 		var info = this.getName() ++ "\n" ++
-		(if (soundset != nil, {"soundset:" + soundset.name.asString ++ "\n"}, { "" })) ++
+		(if (soundset != nil, {
+			"soundset:" + soundset.name.asString ++ "\n" ++
+			"bank: " + bank + "program: " + program ++ "\n"
+		}, { "" })) ++
 		("category:" + this.getCategory()) ++ "\n" ++
 		this.getOscInfo("osc1", fullInfo) ++ "\n" ++
 		this.getOscInfo("osc2", fullInfo) ++ "\n" ++
