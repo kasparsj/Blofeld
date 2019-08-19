@@ -16,35 +16,35 @@ var program = rrand(0, 127);
 ### request sound
 ```supercollider
 // requires connected USB or MIDIOut from Blofeld
-~blofeld.requestSound({|sound|
+~blofeld.editBuffer.download({|sound|
 	sound.printInfo;
 	//sound.printInfo(true); // print full info
-	sound.getParam(\filter1Type).postln;
+	sound.get(\filter1Type).postln;
 });
 // print implemented param names
 BlofeldParam.byName.keys.postln;
 ```
 ### init sound
 ```supercollider
-~blofeld.initSound();
+~blofeld.editBuffer.init();
 ```
 ### randomize sound
 ```supercollider
-~blofeld.randomizeSound(); // randomize everything
-~blofeld.randomizeSound(\filter1); // randomize filter1 only
+~blofeld.editBuffer.randomize(); // randomize everything
+~blofeld.editBuffer.randomize(\filter1); // randomize filter1 only
 ```
 ### change single param
 ```supercollider
-~blofeld.setParam(\filter1Type, rrand(0, 10));
-~blofeld.setParam(\filter1Cutoff, rrand(0, 127));
+~blofeld.editBuffer.set(\filter1Type, rrand(0, 10));
+~blofeld.editBuffer.set(\filter1Cutoff, rrand(0, 127));
 ```
 ### filter example
 ```supercollider
 (
 ~blofeld = Blofeld.new.connect("Blofeld", "");
 ~blofeld.selectSound(1, 90); // select B091 (Clavinetro)
-~blofeld.requestSound({ // request selected sound parameter values
-	~cutoff = ~blofeld.getParam(\filter1Cutoff);
+~blofeld.editBuffer.download({ // request selected sound parameter values
+	~cutoff = ~blofeld.editBuffer.get(\filter1Cutoff);
 	Pdef(\blofeldFilterExample, Ppar([
 		Pspawn(Pbind(
 			\method, \par,
@@ -71,7 +71,7 @@ BlofeldParam.byName.keys.postln;
 			\dur, 0.25,
 			\filter1Cutoff, Pfunc { |event|
 				var speed = 1/3;
-				var current = ~blofeld.getParam(\filter1Cutoff);
+				var current = ~blofeld.editBuffer.get(\filter1Cutoff);
 				current + ((~cutoff - current) * speed); // animate ~cutoff to target value
 			},
 		),
@@ -79,7 +79,7 @@ BlofeldParam.byName.keys.postln;
 			\type, \blofeld,
 			\dur, 1,
 			\effect2Mix, Pfunc {
-				var value = ~blofeld.getParam(\effect2Mix) + 1;
+				var value = ~blofeld.editBuffer.get(\effect2Mix) + 1;
 				if (value > 127, { 0 }, { value }); // increase click-delay mix every second
 			},
 		),
@@ -102,7 +102,7 @@ Pdef(\blofeldFilterExample).stop;
 	//random number of envelope segments
 	var numSegs = i.linexp(0,9,4,40).round;
 	// make every wave slightly different
-	var wavetable = ~blofeld.createWavetable({
+	var wavetable = BlofeldWavetable.newFrom({
 		//env always begins and ends with zero
 		//inner points are random from -1.0 to 1.0
 		[0]++({1.0.rand}.dup(numSegs-1) * [1,-1]).scramble++[0]
@@ -114,7 +114,8 @@ Pdef(\blofeldFilterExample).stop;
 		//high index wavetables tend to have sharp angles and corners
 		{[\sine,0,exprand(1,20) * [1,-1].choose].wchoose([9-i,3,i].normalizeSum)}.dup(numSegs)
 	});
-	~blofeld.sendWavetable(80+i, wavetable, "new sine wt"++(i+1));
+	wavetable.setSlot(80+i).setName("sine wt"+(i+1));
+	~blofeld.upload(wavetable);
 };
 r = Routine({
 	10.do { |i|
@@ -133,7 +134,7 @@ r.play;
 r = Routine({
 	10.do({ |i|
 		("init sound"+i).postln;
-		~blofeld.initSound(Blofeld.editBuffer, i);
+		~blofeld.editBuffer.init(i);
 		1.wait;
 	});
 });
@@ -144,7 +145,7 @@ r.play;
 // patterns from: http://sccode.org/1-5bF#c876
 t = TempoClock.new(90/60).permanent_(true);
 ~shapes = [Blofeld.shape[\sine]]++(Blofeld.shape[\user1]..Blofeld.shape[\user9]);
-~blofeld.clearEditBuffer((0..9));
+~blofeld.editBuffer.clear((0..9));
 Pdef(\pad, Pbind(
 	\type, \blofeld,
 	\osc1Shape, Prand(~shapes[0..3], inf),
@@ -158,7 +159,7 @@ Pdef(\pad, Pbind(
 	\ampEnvDecay, 127,
 	\ampEnvSustain, 0,
 	\ampEnvRelease, Pexprand(60, 120),
-	\effect2Type, Blofeld.effect[\reverb],
+	\effect2Type, Blofeld.effect2Type[\reverb],
 	\effect2Mix, 63,
 	\lfo1Shape, Blofeld.lfoShape[\random],
 	\lfo1Speed, Pwhite(1, 8),
