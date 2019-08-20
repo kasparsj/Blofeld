@@ -16,7 +16,7 @@ BlofeldSoundBrowser {
 	var <initialized = false;
 	var <currentBank = \a;
 	var <currentCategory = \all;
-	var <currentSoundset = \all;
+	var <currentSoundset;
 	var <currentSounds;
 	var <currentSound;
 	var <currentPage = 1;
@@ -62,11 +62,11 @@ BlofeldSoundBrowser {
 	*updateClassvars {
 		banks = [\all] ++ Blofeld.bank.keys.asArray.sort;
 		categories = [\all] ++ Blofeld.category.values.sort.collect({ |v| Blofeld.category.findKeyForValue(v); });
-		soundsets = [\all] ++ BlofeldSoundset.loaded.keys.asArray.sort;
+		soundsets = [\all] ++ (BlofeldSoundset.files ++ BlofeldSoundset.loaded).keys.asArray.sort;
 	}
 
-	*new { |blofeld, loadAllSoundsets = true|
-		^super.newCopyArgs(blofeld).init(loadAllSoundsets);
+	*new { |blofeld|
+		^super.newCopyArgs(blofeld).init;
 	}
 
 	init { |loadAllSoundsets|
@@ -79,30 +79,31 @@ BlofeldSoundBrowser {
 		this.createButtons;
 		this.createFooter;
 		this.createSidebar;
-
-		SystemClock.sched(0.1, {
-			var allSounds;
-			if (loadAllSoundsets, {
-				BlofeldSoundset.loadAll;
-			});
-			allSounds = BlofeldSoundset.select(true);
-			if (soundsCache.size != allSounds.size, {
-				soundsCache = allSounds.sort {|a, b| a.getName < b.getName };
-			});
-
-			{ this.initFinished }.defer;
-		});
 	}
 
-	initFinished {
-		initialized = true;
+	start { |loadSoundsets|
+		this.updateCache;
 		BlofeldSoundBrowser.updateClassvars;
+		currentSoundset = if (BlofeldSoundset.loaded.size >= BlofeldSoundset.files.size, {
+			\all;
+		}, {
+			loadSoundsets[0] ? BlofeldSoundset.loaded.keys.asArray.sort[0];
+		});
+		initialized = true;
 		categoriesMenu.items = categories;
 		soundsetsMenu.items = soundsets;
 		currentSoundText.string = "click on a button to choose a Sound";
 		// now that buttonArray exists, we can run EZPopUpMenu action to initialize button labels:
-		categoriesMenu.valueAction = currentCategory;
-		soundsetsMenu.valueAction = currentSoundset;
+		categoriesMenu.valueAction = categories.indexOf(currentCategory);
+		soundsetsMenu.valueAction = soundsets.indexOf(currentSoundset);
+	}
+
+	updateCache {
+		var allSounds;
+		allSounds = BlofeldSoundset.select(true);
+		if (soundsCache.size != allSounds.size, {
+			soundsCache = allSounds.sort {|a, b| a.getName < b.getName };
+		});
 	}
 
 	createWindow {
@@ -158,7 +159,12 @@ BlofeldSoundBrowser {
 			label: "soundset: ",
 			items: soundsets,
 			globalAction: { |menu|
-				currentSoundset = menu.item;
+				var selected = menu.item.asSymbol;
+				if (BlofeldSoundset.files[selected] != nil, {
+					BlofeldSoundset.load(BlofeldSoundset.files[selected]);
+					this.updateCache;
+				});
+				currentSoundset = selected;
 				currentPage = 1;
 				if (initialized, {
 					this.reloadSounds;

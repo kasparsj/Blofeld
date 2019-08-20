@@ -39,6 +39,8 @@ Blofeld {
 	var <global;
 	var <editBuffer;
 	var <midiOut;
+	var soundBrowser;
+	var wavetableBrowser;
 
 	*initClass {
 		Class.initClassTree(Event);
@@ -103,12 +105,29 @@ Blofeld {
 		Event.addParentType(\blofeld, (blofeld: this));
 	}
 
-	soundBrowser { |loadSoundsets = true|
-		BlofeldSoundBrowser.new(this, loadSoundsets);
+	soundBrowser { |loadSoundsets = \all|
+		soundBrowser = BlofeldSoundBrowser.new(this);
+		if (loadSoundsets != nil) {
+			SystemClock.sched(0.2, {
+				if (loadSoundsets == \all) {
+					BlofeldSoundset.loadAll;
+				} {
+					if (loadSoundsets.isArray.not, {
+						loadSoundsets = [loadSoundsets];
+					});
+					loadSoundsets.do { |name|
+						BlofeldSoundset.load(BlofeldSoundset.files[name]);
+					};
+				};
+				{ soundBrowser.start(loadSoundsets) }.defer;
+			});
+		} {
+			soundBrowser.start;
+		};
 	}
 
 	wavetableBrowser {
-		BlofeldWavetableBrowser.new(this);
+		wavetableBrowser = BlofeldWavetableBrowser.new(this);
 	}
 
 	noteOn { |note = 60, veloc = 64, chan = 0|
