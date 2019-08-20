@@ -103,8 +103,8 @@ Blofeld {
 		Event.addParentType(\blofeld, (blofeld: this));
 	}
 
-	gui {
-		BlofeldGui.new(this);
+	gui { |loadSoundsets = true|
+		BlofeldGui.new(this, loadSoundsets);
 	}
 
 	noteOn { |note = 60, veloc = 64, chan = 0|

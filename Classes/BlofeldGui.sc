@@ -13,6 +13,7 @@ BlofeldGui {
 	var <leftButton, <rightButton;
 	var <sidebar;
 
+	var <initialized = false;
 	var <currentBank = \a;
 	var <currentCategory = \all;
 	var <currentSoundset = \all;
@@ -58,25 +59,47 @@ BlofeldGui {
 		);
 	}
 
-	*new { |blofeld, updateCache = true|
+	*updateClassvars {
 		banks = [\all] ++ Blofeld.bank.keys.asArray.sort;
 		categories = [\all] ++ Blofeld.category.values.sort.collect({ |v| Blofeld.category.findKeyForValue(v); });
 		soundsets = [\all] ++ BlofeldSoundset.loaded.keys.asArray.sort;
-		if (updateCache, {
-			soundsCache = BlofeldSoundset.select(true).sort {|a, b| a.getName() < b.getName() };
-		});
-		^super.newCopyArgs(blofeld).init();
 	}
 
-	init {
+	*new { |blofeld, loadAllSoundsets = true|
+		^super.newCopyArgs(blofeld).init(loadAllSoundsets);
+	}
+
+	init { |loadAllSoundsets|
 		currentSounds = [];
 
-		this.createWindow();
-		this.createHeader();
-		this.createButtons();
-		this.createFooter();
-		this.createSidebar();
+		BlofeldGui.updateClassvars;
 
+		this.createWindow;
+		this.createHeader;
+		this.createButtons;
+		this.createFooter;
+		this.createSidebar;
+
+		SystemClock.sched(0.1, {
+			var allSounds;
+			if (loadAllSoundsets, {
+				BlofeldSoundset.loadAll;
+			});
+			allSounds = BlofeldSoundset.select(true);
+			if (soundsCache.size != allSounds.size, {
+				soundsCache = allSounds.sort {|a, b| a.getName < b.getName };
+			});
+
+			{ this.initFinished }.defer;
+		});
+	}
+
+	initFinished {
+		initialized = true;
+		BlofeldGui.updateClassvars;
+		categoriesMenu.items = categories;
+		soundsetsMenu.items = soundsets;
+		currentSoundText.string = "click on a button to choose a Sound";
 		// now that buttonArray exists, we can run EZPopUpMenu action to initialize button labels:
 		categoriesMenu.valueAction = currentCategory;
 		soundsetsMenu.valueAction = currentSoundset;
@@ -119,8 +142,10 @@ BlofeldGui {
 			globalAction: { |menu|
 				currentCategory = menu.item;
 				currentPage = 1;
-				this.reloadSounds;
-				this.updatePages;
+				if (initialized, {
+					this.reloadSounds;
+					this.updatePages;
+				});
 			},
 			initVal: if (currentCategory != \all, { categories.indexOf(currentCategory) }, { 0 }),
 			initAction: false, // because buttonArray does not exist yet
@@ -135,8 +160,10 @@ BlofeldGui {
 			globalAction: { |menu|
 				currentSoundset = menu.item;
 				currentPage = 1;
-				this.reloadSounds;
-				this.updatePages;
+				if (initialized, {
+					this.reloadSounds;
+					this.updatePages;
+				});
 			},
 			initVal: if (currentSoundset != \all, { soundsets.indexOf(currentSoundset) }, { 0 }),
 			initAction: false, // because buttonArray does not exist yet
@@ -147,8 +174,10 @@ BlofeldGui {
 		.string_(searchText).action_({
 			searchText = searchInput.string;
 			currentPage = 1;
-			this.reloadSounds;
-			this.updatePages;
+			if (initialized, {
+				this.reloadSounds;
+				this.updatePages;
+			});
 		});
 	}
 
@@ -222,7 +251,7 @@ BlofeldGui {
 		currentSoundText = StaticText.new(
 			parent: footer1,
 			bounds: Rect(0, 0, footer1.bounds.width, footer1.bounds.height))
-		.string_("click on a button to choose a Patch")
+		.string_("loading library...")
 		.background_(Color.gray(0.5, 0.2))
 		.align_(\center)
 		.font_(Font(Font.default, size: 24, bold: true))

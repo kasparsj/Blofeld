@@ -30,9 +30,9 @@ BlofeldSoundset {
 	}
 
 	*load { |path, reload = false|
-		var name = files.findKeyForValue(path) ?? path.basename.asSymbol;
+		var name = (files.findKeyForValue(path) ?? path.basename).asSymbol;
 		var obj = loaded[name];
-		if (obj == nil || reload, {
+		if ((obj == nil) || reload, {
 			obj = this.new;
 			if (path.extension.toLower == "mid", {
 				var midiFile = SimpleMIDIFile.read(path);
