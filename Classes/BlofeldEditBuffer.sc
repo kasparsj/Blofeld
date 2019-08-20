@@ -5,7 +5,7 @@ BlofeldEditBuffer {
 	var <parts;
 
 	*new { |blofeld|
-		^super.newCopyArgs(blofeld, ());
+		^super.newCopyArgs(blofeld, Array.newClear(16));
 	}
 
 	get { |param, location = 0|
@@ -64,14 +64,20 @@ BlofeldEditBuffer {
 		}).play;
 	}
 
-	init { |callback = nil, location = 0|
-		this.getOrCreatePart(location).init();
-		^this.upload(parts[location], callback, location);
+	init { |callback = nil, location = 0, num = 1|
+		location = location ? 0;
+		num.do { |i|
+			this.getOrCreatePart((location + i)).init;
+		}
+		^this.upload(parts[location..(location+num-1)], callback, location);
 	}
 
-	randomize { |callback, location = 0, group = \sysex|
-		this.getOrCreatePart(location).randomize(group);
-		^this.upload(parts[location], callback, location);
+	randomize { |callback = nil, location = 0, group = \sysex, num = 1|
+		location = location ? 0;
+		num.do { |i|
+			this.getOrCreatePart((location + i)).randomize(group);
+		}
+		^this.upload(parts[location..(location+num-1)], callback, location);
 	}
 
 	getPart { |location = 0|
@@ -90,10 +96,10 @@ BlofeldEditBuffer {
 	clear { |ps = 0|
 		if (ps.isArray, {
 			ps.do { |p|
-				parts.removeAt(p);
+				parts[p] = nil;
 			};
 		}, {
-			parts.removeAt(ps);
+			parts[ps] = nil;
 		});
 	}
 

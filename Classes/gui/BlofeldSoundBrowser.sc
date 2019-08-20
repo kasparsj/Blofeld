@@ -1,4 +1,4 @@
-BlofeldGui {
+BlofeldSoundBrowser {
 	var <blofeld;
 	var <window;
 	var <header;
@@ -72,7 +72,7 @@ BlofeldGui {
 	init { |loadAllSoundsets|
 		currentSounds = [];
 
-		BlofeldGui.updateClassvars;
+		BlofeldSoundBrowser.updateClassvars;
 
 		this.createWindow;
 		this.createHeader;
@@ -96,7 +96,7 @@ BlofeldGui {
 
 	initFinished {
 		initialized = true;
-		BlofeldGui.updateClassvars;
+		BlofeldSoundBrowser.updateClassvars;
 		categoriesMenu.items = categories;
 		soundsetsMenu.items = soundsets;
 		currentSoundText.string = "click on a button to choose a Sound";
@@ -109,7 +109,7 @@ BlofeldGui {
 		Window.closeAll;
 
 		window = Window.new(
-			name: "Blofeld",
+			name: "Blofeld sound browser",
 			bounds: Rect.new(
 				left: 100,
 				top: 100,
@@ -251,7 +251,7 @@ BlofeldGui {
 		currentSoundText = StaticText.new(
 			parent: footer1,
 			bounds: Rect(0, 0, footer1.bounds.width, footer1.bounds.height))
-		.string_("loading library...")
+		.string_("loading sounds...")
 		.background_(Color.gray(0.5, 0.2))
 		.align_(\center)
 		.font_(Font(Font.default, size: 24, bold: true))

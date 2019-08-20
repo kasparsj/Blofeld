@@ -103,8 +103,12 @@ Blofeld {
 		Event.addParentType(\blofeld, (blofeld: this));
 	}
 
-	gui { |loadSoundsets = true|
-		BlofeldGui.new(this, loadSoundsets);
+	soundBrowser { |loadSoundsets = true|
+		BlofeldSoundBrowser.new(this, loadSoundsets);
+	}
+
+	wavetableBrowser {
+		BlofeldWavetableBrowser.new(this);
 	}
 
 	noteOn { |note = 60, veloc = 64, chan = 0|
@@ -542,6 +546,17 @@ Blofeld {
 		octave = ();
 		9.do { |i|
 			octave.put(((128/(i*2)).asInteger.asString++"'").asSymbol, 16+(i*12));
-		}
+		};
+	}
+}
+
++ Panola {
+	asBlofeldPbind {|chan = 0, props = nil|
+		props = props ?? [];
+		^Pbindf(this.asPbind({}),
+			\type, \blofeld,
+			\chan, chan,
+			*props.flatten
+		);
 	}
 }

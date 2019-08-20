@@ -110,16 +110,7 @@ BlofeldSysex {
 		packet = packet.add(0x00); // format
 		128.do({ |i|
 			var sample = (samples[i*mult] * 1048575).asInteger;
-			// packet = packet.add((sample >> 14) & 0x7f);
-			// packet = packet.add((sample >> 7) & 0x7f);
-			// packet = packet.add((sample) & 0x7f);
-			if (sample < 0, {
-				packet = packet.add((sample & 0x000FC000) >> 14 + 0x40);
-				}, {
-					packet = packet.add((sample & 0x000FC000) >> 14);
-			});
-			packet = packet.add((sample & 0x00003F80) >> 7);
-			packet = packet.add((sample & 0x0000007F));
+			packet = packet.addAll(this.unpack(sample));
 		});
 		14.do({ |i|
 			var char = if(ascii[i] != nil, { ascii[i] & 0x7f }, { 0x00 });
@@ -149,6 +140,26 @@ BlofeldSysex {
 			packet = packet.add(sysexEnd);
 		});
 		^packet;
+	}
+
+	*unpack { |value|
+		var arr = [];
+		// arr = arr.add((value >> 14) & 0x7f);
+		// arr = arr.add((value >> 7) & 0x7f);
+		// arr = arr.add((value) & 0x7f);
+		if (value < 0, {
+			arr = arr.add((value & 0x000FC000) >> 14 + 0x40);
+			}, {
+				arr = arr.add((value & 0x000FC000) >> 14);
+		});
+		arr = arr.add((value & 0x00003F80) >> 7);
+		arr = arr.add((value & 0x0000007F));
+		^arr;
+	}
+
+	*pack { |byte1, byte2, byte3|
+		var value = (byte1 << 14) | (byte2 << 7) | (byte3);
+		^value;
 	}
 
 	*checksum { |data|

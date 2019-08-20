@@ -10,17 +10,23 @@ BlofeldSoundset {
 
 	*initClass {
 		var sep = thisProcess.platform.pathSeparator;
-		var filesDir = this.filenameSymbol.asString.dirname.dirname ++ sep ++ "Soundsets";
+		var filesDir = (this.filenameSymbol.asString.dirname.dirname ++ sep ++ "Soundsets").asPathName;
 		files = ();
-		files.put(\factory2012, (filesDir ++ sep ++ "factory_set_2012.mid"));
-		files.put(\factory2008, (filesDir ++ sep ++ "blofeld_fact_080223.syx"));
-		files.put(\easterset, (filesDir ++ sep ++ "blo_easterset.mid"));
-		files.put(\Lanthans, (filesDir ++ sep ++ "LanthansSoundset.syx"));
-		files.put(\ForumOneTwoThree, (filesDir ++ sep ++ "microQ" ++ sep ++ "ForumOneTwoThree_Blofeld.mid"));
-		files.put(\FlakScrambler, (filesDir ++ sep ++ "microQ" ++ sep ++ "FlakScrambler_Blofeld.mid"));
-		files.put(\DocT, (filesDir ++ sep ++ "microQ" ++ sep ++ "DocT_Blofeld.mid"));
-		files.put(\uQ2001, (filesDir ++ sep ++ "microQ" ++ sep ++ "uQ2001_Blofeld.mid"));
 		loaded = ();
+		this.scanMidiFiles(filesDir, 1);
+	}
+
+	*scanMidiFiles { |folder, depth = 0|
+		folder.files.do { |file|
+			if ([\mid, \syx].indexOf(file.extension.toLower.asSymbol) != nil) {
+				files.put(file.fileNameWithoutExtension.asSymbol, file.asAbsolutePath);
+			};
+		};
+		if (depth > 0) {
+			folder.folders.do { |subFolder|
+				this.scanMidiFiles(subFolder, depth - 1);
+			};
+		};
 	}
 
 	*loadAll { |reload = false|
@@ -30,11 +36,11 @@ BlofeldSoundset {
 	}
 
 	*load { |path, reload = false|
-		var name = (files.findKeyForValue(path) ?? path.basename).asSymbol;
+		var name = path.asPathName.fileNameWithoutExtension.asSymbol;
 		var obj = loaded[name];
-		if ((obj == nil) || reload, {
+		if ((obj == nil) || reload) {
 			obj = this.new;
-			if (path.extension.toLower == "mid", {
+			if (path.extension.toLower == "mid") {
 				var midiFile = SimpleMIDIFile.read(path);
 				midiFile.sysexEvents.do { |sysexEvent|
 					// 0 track
@@ -54,7 +60,7 @@ BlofeldSoundset {
 						obj.add(BlofeldSound.new(sysexEvent[6], sysexEvent[7], data));
 					});
 				};
-			}, {
+			} {
 				var sysexFile = SysexFile.read(path);
 				sysexFile.events.do { |sysexEvent|
 					// 0 WaldorfID
@@ -71,10 +77,10 @@ BlofeldSoundset {
 						obj.add(BlofeldSound.new(sysexEvent[4], sysexEvent[5], data));
 					});
 				};
-			});
+			};
 			obj.name = name;
 			loaded.put(obj.name, obj);
-		});
+		};
 		^obj;
 	}
 
