@@ -6,6 +6,7 @@ BlofeldWavetable {
 	var <signal;
 	var <>displayName;
 	var <>name;
+	var <>blofeld;
 
 	*initClass {
 		var sep = thisProcess.platform.pathSeparator;
@@ -144,13 +145,14 @@ BlofeldWavetable {
 		^(signal.size / (128*64)).asInteger.max(1);
 	}
 
-	upload { |midiOut, deviceID = 0x00|
+	upload { |callback = nil|
 		var numChannels = this.numChannels;
 		this.checkForErrors;
 		this.fixSignalSize;
 		64.do({ |i|
-			midiOut.sysex(BlofeldSysex.wavetableDumpPacket(slot, signal[(128*i*numChannels)..(128*(i+1)*numChannels-1)], displayName.ascii, i, numChannels, deviceID));
+			blofeld.midiOut.sysex(BlofeldSysex.wavetableDumpPacket(slot, signal[(128*i*numChannels)..(128*(i+1)*numChannels-1)], displayName.ascii, i, numChannels, blofeld.deviceID));
 		});
+		if (callback != nil, { callback.value });
 	}
 
 	validate {

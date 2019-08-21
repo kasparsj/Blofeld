@@ -31,11 +31,14 @@ Blofeld {
 	classvar <noise;
 	classvar <ascii;
 	classvar <octave;
+	classvar <channel;
+	classvar <tempo;
 	classvar <numInstances = 0;
 
 	var <>deviceID;
 	var <callbacks;
 	var <sounds;
+	var <multis;
 	var <global;
 	var <editBuffer;
 	var <midiOut;
@@ -81,6 +84,7 @@ Blofeld {
 
 	init {
 		sounds = BlofeldSoundset.new(this);
+		multis = BlofeldMultiset.new(this);
 		global = BlofeldGlobal.new(this);
 		editBuffer = BlofeldEditBuffer.new(this);
 		if (Blofeld.numInstances == 1, {
@@ -156,9 +160,20 @@ Blofeld {
 					sounds.download(obj, callback);
 				});
 			},
+			BlofeldMulti, {
+				obj.blofeld = this;
+				obj.download(callback);
+			},
 			BlofeldSoundset, {
 				obj.blofeld = this;
 				obj.downloadAll(callback);
+			},
+			BlofeldMultiset, {
+				obj.blofeld = this;
+				obj.downloadAll(callback);
+			},
+			BlofeldWavetable, {
+				Error("Blofeld does not support wavetable download").throw;
 			},
 			BlofeldGlobal, {
 				obj.download(callback);
@@ -175,8 +190,16 @@ Blofeld {
 					sounds.upload(obj);
 				});
 			},
+			BlofeldMulti, {
+				if (obj.isEditBuffer, {
+					editBuffer.uploadMulti(obj);
+				}, {
+					multis.upload(obj);
+				});
+			},
 			BlofeldWavetable, {
-				obj.upload(midiOut, deviceID);
+				obj.blofeld = this;
+				obj.upload(callback);
 			},
 			BlofeldGlobal, {
 				obj.upload(callback);
@@ -554,6 +577,17 @@ Blofeld {
 		octave = ();
 		9.do { |i|
 			octave.put(((128/(i*2)).asInteger.asString++"'").asSymbol, 16+(i*12));
+		};
+		channel = (
+			global: 0,
+			omni: 1,
+		);
+		16.do { |i|
+			channel.put((i+1).asSymbol, (i+2));
+		};
+		tempo = ();
+		128.do { |i|
+			tempo.put((((260/127)*i).asInteger+40), i);
 		};
 	}
 }

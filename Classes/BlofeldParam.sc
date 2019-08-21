@@ -1,7 +1,13 @@
 BlofeldParam {
 	classvar <params;
+	classvar <multiParams;
+	classvar <globalParams;
+
 	classvar <byName;
+	classvar <multiByName;
+	classvar <globalByName;
 	classvar <paramSysex;
+	classvar <multiSysex;
 	classvar <globalSysex;
 	classvar <byControl;
 	classvar <groups;
@@ -11,7 +17,6 @@ BlofeldParam {
 	var <control;
 	var <values;
 	var <defaultValue;
-	var <isGlobal = false;
 	var <relParam;
 	var <>sequential = true;
 
@@ -321,6 +326,63 @@ BlofeldParam {
 			// category
 			BlofeldParam.new(\category, 379, nil, Blofeld.category, -1),
 
+			// control only
+			BlofeldParam.new(\bankMSB, nil, 0, (0..127)), //
+			BlofeldParam.new(\pan, nil, 10, (0..127)),
+			BlofeldParam.new(\expression, nil, 11, (0..127)),
+			BlofeldParam.new(\bankLSB, nil, 32, (0..7)), // (a...h)
+			BlofeldParam.new(\pitchmod, nil, 50, (0..127)),
+			BlofeldParam.new(\sustainPedal, nil, 64, (0..127)),
+			BlofeldParam.new(\sustenuto, nil, 66, (0..127)),
+			BlofeldParam.new(\allSoundOff, nil, 120, [0]),
+			BlofeldParam.new(\resetAllControllers, nil, 121, [0]),
+			BlofeldParam.new(\localControl, nil, 122, (0..127)),
+			BlofeldParam.new(\allNotesOff, nil, 123, [0]),
+			// does not seem to be working:
+			// BlofeldParam.new(\omniModeOff, nil, 124, [0]),
+			// BlofeldParam.new(\omniModeOn, nil, 125, [0]),
+			// BlofeldParam.new(\polyModeOff, nil, 126, [0]), // 0
+			// BlofeldParam.new(\polyModeOn, nil, 127, [0]),
+		];
+
+		multiParams = [
+			// multi data
+			BlofeldMultiParam.new(\multiName1, 0, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName2, 1, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName3, 2, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName4, 3, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName5, 4, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName6, 5, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName7, 6, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName8, 7, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName9, 8, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName10, 9, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName11, 10, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName12, 11, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName13, 12, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName14, 13, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName15, 14, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiName16, 15, nil, Blofeld.ascii),
+			BlofeldMultiParam.new(\multiVolume, 17, nil, (0..127)),
+			BlofeldMultiParam.new(\multiTempo, 18, nil, Blofeld.tempo, 54),
+		];
+		// 16 parts
+		16.do { |i|
+			var j = i+1;
+			multiParams = multiParams.addAll([
+				BlofeldMultiParam.new(("bank"++j).asSymbol, 32+(24*i), nil, Blofeld.bank),
+				BlofeldMultiParam.new(("sound"++j).asSymbol, 33+(24*i), nil, (0..127)),
+				BlofeldMultiParam.new(("vol"++j).asSymbol, 34+(24*i), nil, (0..127)),
+				BlofeldMultiParam.new(("pan"++j).asSymbol, 35+(24*i), nil, Blofeld.m64p63, 64),
+				BlofeldMultiParam.new(("transpose"++j).asSymbol, 37+(24*i), nil, Blofeld.m64p63, 64),
+				BlofeldMultiParam.new(("detune"++j).asSymbol, 38+(24*i), nil, Blofeld.m64p63, 64),
+				BlofeldMultiParam.new(("chan"++j).asSymbol, 39+(24*i), nil, Blofeld.channel),
+				BlofeldMultiParam.new(("lowVel"++j).asSymbol, 42+(24*i), nil, (1..127)),
+				BlofeldMultiParam.new(("highVel"++j).asSymbol, 43+(24*i), nil, (1..127)),
+			]);
+		};
+
+		globalParams = [
 			// global data
 			BlofeldGlobalParam.new(\multiMode, 1, nil, (0..1)),
 			BlofeldGlobalParam.new(\multiBank1, 2, nil, (0..7)), // these seem to be read-only
@@ -372,46 +434,33 @@ BlofeldParam {
 			BlofeldGlobalParam.new(\controlZ, 54, nil, (0..120)),
 			BlofeldGlobalParam.new(\volume, 55, 7, (0..127)),
 			BlofeldGlobalParam.new(\catFilter, 56, nil, Blofeld.catFilter),
-
-			// control only
-			BlofeldParam.new(\bankMSB, nil, 0, (0..127)), //
-			BlofeldParam.new(\pan, nil, 10, (0..127)),
-			BlofeldParam.new(\expression, nil, 11, (0..127)),
-			BlofeldParam.new(\bankLSB, nil, 32, (0..7)), // (a...h)
-			BlofeldParam.new(\pitchmod, nil, 50, (0..127)),
-			BlofeldParam.new(\sustainPedal, nil, 64, (0..127)),
-			BlofeldParam.new(\sustenuto, nil, 66, (0..127)),
-			BlofeldParam.new(\allSoundOff, nil, 120, [0]),
-			BlofeldParam.new(\resetAllControllers, nil, 121, [0]),
-			BlofeldParam.new(\localControl, nil, 122, (0..127)),
-			BlofeldParam.new(\allNotesOff, nil, 123, [0]),
-			// does not seem to be working:
-			// BlofeldParam.new(\omniModeOff, nil, 124, [0]),
-			// BlofeldParam.new(\omniModeOn, nil, 125, [0]),
-			// BlofeldParam.new(\polyModeOff, nil, 126, [0]), // 0
-			// BlofeldParam.new(\polyModeOn, nil, 127, [0]),
 		];
 		this.initGroups();
 	}
 
 	*initGroups {
 		byName = ();
+		multiByName = ();
+		globalByName = ();
 		paramSysex = ();
+		multiSysex = ();
 		globalSysex = ();
 		byControl = ();
-		params.do({ |value|
+		params.do { |value|
 			byName.put(value.name, value);
-			if (value.sysex != nil, {
-				if (value.isGlobal, {
-					globalSysex.put(value.sysex, value);
-				}, {
-					paramSysex.put(value.sysex, value);
-				});
-			});
+			paramSysex.put(value.sysex ? -1, value);
 			if (value.control != nil, {
 				byControl.put(value.control, value);
 			});
-		});
+		};
+		multiParams.do { |value|
+			multiByName.put(value.name, value);
+			multiSysex.put(value.sysex ? -1, value);
+		};
+		globalParams.do { |value|
+			globalByName.put(value.name, value);
+			globalSysex.put(value.sysex ? -1, value);
+		};
 		groups = (
 			\sysex: paramSysex.values ++ globalSysex.values,
 			\control: byControl.values,
@@ -425,7 +474,7 @@ BlofeldParam {
 	}
 
 	*new { |name, sysex, control, values, defaultValue = 0, relParam|
-		^super.newCopyArgs(name, sysex, control, values, defaultValue, false, relParam);
+		^super.newCopyArgs(name, sysex, control, values, defaultValue, relParam);
 	}
 
 	rand {
@@ -541,8 +590,14 @@ BlofeldParam {
 	}
 }
 
+BlofeldMultiParam : BlofeldParam {
+	*new { |name, sysex, control, values, defaultValue = 0|
+		^super.newCopyArgs(name, sysex, control, values, defaultValue);
+	}
+}
+
 BlofeldGlobalParam : BlofeldParam {
 	*new { |name, sysex, control, values, defaultValue = 0|
-		^super.newCopyArgs(name, sysex, control, values, defaultValue, true);
+		^super.newCopyArgs(name, sysex, control, values, defaultValue);
 	}
 }

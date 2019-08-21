@@ -34,9 +34,16 @@ BlofeldWavetableBrowser {
 
 		};
 
-		iv = StaticText(window).maxWidth_(100);
-		dv = StaticText(window).maxWidth_(100);
-		v = SoundFileView(window);
+		this.createHeader;
+		this.createBody;
+		this.createFooter;
+		this.createKeyboard;
+
+		filesMenu.action.value(filesMenu);
+		this.update;
+	}
+
+	createHeader {
 		filesMenu = PopUpMenu(window);
 		filesMenu.items = names = BlofeldWavetable.files.keys.asArray.sort;
 		filesMenu.action = { |v|
@@ -48,14 +55,14 @@ BlofeldWavetableBrowser {
 			this.load(currentWave);
 		};
 		filesMenu.value = 0;
+		iv = StaticText(window).maxWidth_(80);
+		dv = StaticText(window).maxWidth_(100);
 		window.layout.add(HLayout(filesMenu, iv, dv));
+	}
+
+	createBody {
+		v = SoundFileView(window);
 		window.layout.add(v);
-
-		this.createFooter;
-		this.createKeyboard;
-
-		filesMenu.action.value(filesMenu);
-		this.update;
 	}
 
 	createFooter {

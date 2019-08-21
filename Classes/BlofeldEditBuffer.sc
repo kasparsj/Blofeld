@@ -3,9 +3,10 @@ BlofeldEditBuffer {
 
 	var <blofeld;
 	var <parts;
+	var <multi;
 
 	*new { |blofeld|
-		^super.newCopyArgs(blofeld, Array.newClear(16));
+		^super.newCopyArgs(blofeld, Array.newClear(16), BlofeldMulti.new(0, editBufferBank));
 	}
 
 	get { |param, location = 0|
@@ -22,7 +23,7 @@ BlofeldEditBuffer {
 			Error("Invalid param %".format(param)).throw;
 		});
 		if (bParam.sysex == nil, {
-			Error("For global or control params use setGlobalParam or setControlParam").throw;
+			Error("Not an edit buffer param!").throw;
 		});
 		value = bParam.value(value.asInteger);
 		if (sound == nil, {
@@ -44,8 +45,13 @@ BlofeldEditBuffer {
 	}
 
 	download { |callback = nil, location = 0|
-		BlofeldSysex.soundDumpCallback.put(BlofeldEditBuffer.key(location), this.expect(callback));
+		BlofeldSysex.soundDumpCallback.put(BlofeldEditBuffer.key(location), this.expectSound(callback));
 		blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(editBufferBank, location, blofeld.deviceID));
+	}
+
+	downloadMulti { |callback = nil|
+		BlofeldSysex.multiDumpCallback.put(BlofeldEditBuffer.key(\multi), this.expectMulti(callback));
+		blofeld.midiOut.sysex(BlofeldSysex.multiRequestPacket(0, editBufferBank, blofeld.deviceID));
 	}
 
 	upload { |sounds, callback = nil, location = 0|
@@ -103,12 +109,20 @@ BlofeldEditBuffer {
 		});
 	}
 
-	expect { |callback = nil|
+	expectSound { |callback = nil|
 		^{|location, data|
 			var sound = this.getOrCreatePart(location);
 			sound.data = data;
 			if (callback != nil, { callback.value(sound); });
 			BlofeldSysex.soundDumpCallback.removeAt(BlofeldEditBuffer.key(location));
+		}
+	}
+
+	expectMulti { |callback = nil|
+		^{|data|
+			this.multi.data = data;
+			if (callback != nil, { callback.value(this.multi); });
+			BlofeldSysex.multiDumpCallback.removeAt(BlofeldEditBuffer.key(\multi));
 		}
 	}
 
