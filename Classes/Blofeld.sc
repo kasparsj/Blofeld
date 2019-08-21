@@ -284,21 +284,10 @@ Blofeld {
 			chorus2: 70,
 			truePWM: 71,
 			upperWaves: 72,
-			user1: 86,
-			user2: 87,
-			user3: 88,
-			user4: 89,
-			user5: 90,
-			user6: 91,
-			user7: 92,
-			user8: 93,
-			user9: 94,
-			user10: 95,
-			user11: 96,
-			user12: 97,
-			user13: 98,
-			user14: 99,
 		);
+		39.do { |i|
+			shape.put(("user"++(i+1)).asSymbol, 86+i);
+		};
 		osc3Shape = (
 			off: 0,
 			pulse: 1,
