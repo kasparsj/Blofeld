@@ -77,7 +77,7 @@ BlofeldSound {
 		this.getOscInfo("osc2", fullInfo) ++ "\n" ++
 		this.getOscInfo("osc3", fullInfo) ++ "\n" ++
 		this.getFilterInfo("filter1", fullInfo) ++ "\n" ++
-		this.getFilterInfo("filter2", fullInfo) ++ "\n";
+		this.getFilterInfo("filter2", fullInfo) ++ "\n" ++
 		this.getParamInfo([\filterRouting]) ++
 		this.getAmpInfo(fullInfo) ++ "\n" ++
 		this.getEnvInfo("filterEnv", fullInfo) ++ "\n" ++
