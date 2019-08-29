@@ -16,26 +16,29 @@ BlofeldEditBuffer {
 	}
 
 	set { |param, value = 0, location = 0, useCache = false|
-		var bParam = BlofeldParam.byName[param];
+		var bParam = BlofeldSound.byName[param];
+		if (bParam != nil) {
+			this.setSoundParam(bParam, value, location, useCache);
+		} {
+			bParam = BlofeldMulti.byName[param];
+			if (bParam != nil) {
+				this.setMultiParam(bParam, value, location, useCache);
+			} {
+				Error("Invalid param %".format(param)).throw;
+			};
+		};
+	}
+
+	setSoundParam { |bParam, value = 0, location = 0, useCache = false|
 		var sound = parts[location];
 		var uploadChange = useCache.not || (sound == nil);
-		if (bParam == nil, {
-			Error("Invalid param %".format(param)).throw;
-		});
-		if (bParam.sysex == nil, {
-			Error("Not an edit buffer param!").throw;
-		});
 		value = bParam.value(value.asInteger);
 		if (sound == nil, {
 			sound = BlofeldSound.new(editBufferBank, location);
 		});
 		uploadChange = uploadChange || (sound.data[bParam.sysex] != value);
 		if (uploadChange, {
-			if (bParam.control != nil, {
-				blofeld.midiOut.control(location, bParam.control, value);
-			}, {
-				blofeld.midiOut.sysex(BlofeldSysex.paramChangePacket(bParam, value, location, blofeld.deviceID));
-			});
+			blofeld.paramChange(bParam, value, location);
 		});
 		sound.data[bParam.sysex] = value;
 		if (useCache, {
@@ -44,14 +47,16 @@ BlofeldEditBuffer {
 		^value;
 	}
 
+	setMultiParam { |bParam, value = 0, location = 0, useCache = false|
+		// todo: implement
+	}
+
 	download { |callback = nil, location = 0|
-		BlofeldSysex.soundDumpCallback.put(BlofeldEditBuffer.key(location), this.expectSound(callback));
-		blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(editBufferBank, location, blofeld.deviceID));
+		blofeld.soundRequest(editBufferBank, location, this.onSoundDump(callback));
 	}
 
 	downloadMulti { |callback = nil|
-		BlofeldSysex.multiDumpCallback.put(BlofeldEditBuffer.key(\multi), this.expectMulti(callback));
-		blofeld.midiOut.sysex(BlofeldSysex.multiRequestPacket(0, editBufferBank, blofeld.deviceID));
+		blofeld.multiRequest(0, editBufferBank, blofeld.deviceID, this.onMultiDump(callback));
 	}
 
 	upload { |sounds, callback = nil, location = 0|
@@ -63,7 +68,7 @@ BlofeldEditBuffer {
 				sound = sound.copy;
 				sound.bank = editBufferBank;
 				sound.program = location + i;
-				blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
+				blofeld.soundDump(sound);
 				1.wait;
 			};
 			if (callback != nil, { callback.value });
@@ -109,24 +114,18 @@ BlofeldEditBuffer {
 		});
 	}
 
-	expectSound { |callback = nil|
-		^{|location, data|
+	onSoundDump { |callback = nil|
+		^{|bank, location, data|
 			var sound = this.getOrCreatePart(location);
 			sound.data = data;
 			if (callback != nil, { callback.value(sound); });
-			BlofeldSysex.soundDumpCallback.removeAt(BlofeldEditBuffer.key(location));
 		}
 	}
 
-	expectMulti { |callback = nil|
-		^{|data|
+	onMultiDump { |callback = nil|
+		^{|slot, bank, data|
 			this.multi.data = data;
 			if (callback != nil, { callback.value(this.multi); });
-			BlofeldSysex.multiDumpCallback.removeAt(BlofeldEditBuffer.key(\multi));
 		}
-	}
-
-	*key { |location = 0|
-		^("editBuffer"++location).asSymbol;
 	}
 }

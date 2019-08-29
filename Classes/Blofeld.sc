@@ -1,4 +1,7 @@
 Blofeld {
+	const <allSoundsBank = 0x40;
+	const <allMultisBank = 0x10;
+
 	classvar <bank;
 	classvar <shape;
 	classvar <fBalance;
@@ -36,7 +39,6 @@ Blofeld {
 	classvar <numInstances = 0;
 
 	var <>deviceID;
-	var <callbacks;
 	var <sounds;
 	var <multis;
 	var <global;
@@ -51,32 +53,35 @@ Blofeld {
 		this.initDictionaries();
 
 		Event.addEventType(\blofeld, { |server|
+			var chan = ~chan ? 0;
+			var useCache = ~useCache ? true;
 			var uploadGlobal = false;
 			currentEnvironment.keys.do({ |key|
-				var bParam = BlofeldParam.byName[key];
-				if (bParam != nil, {
-					if (bParam.isGlobal, {
+				if ((BlofeldSound.byName[key] != nil) ||
+					(BlofeldMulti.byName[key] != nil)
+				) {
+					~blofeld.editBuffer.set(key, currentEnvironment[key], chan, useCache);
+				} {
+					if (BlofeldGlobal.byName[key] != nil) {
+						// todo: implement changed
+						var changed = true;
 						~blofeld.global.set(key, currentEnvironment[key]);
-						uploadGlobal = true;
-					}, {
-						var chan = ~chan ?? 0;
-						var useCache = ~useCache ?? true;
-						~blofeld.editBuffer.set(key, currentEnvironment[key], chan, useCache);
-					});
-				});
+						uploadGlobal = (uploadGlobal || changed);
+					};
+				};
 			});
-			if (uploadGlobal, {
+			if (uploadGlobal) {
 				~blofeld.global.upload();
-			});
-			if  (~midicmd != nil, {
+			};
+			if  (~midicmd != nil) {
 				if (~midiout == nil, { ~midiout = ~blofeld.midiOut; });
 				~eventTypes[\midi].value(server);
-			});
+			};
 		});
 	}
 
 	*new { |deviceID = 0|
-		var instance = super.newCopyArgs(deviceID, ());
+		var instance = super.newCopyArgs(deviceID);
 		numInstances = numInstances + 1;
 		instance.init();
 		^instance;
@@ -161,8 +166,11 @@ Blofeld {
 				});
 			},
 			BlofeldMulti, {
-				obj.blofeld = this;
-				obj.download(callback);
+				if (obj.isEditBuffer, {
+					editBuffer.downloadMulti(callback);
+				}, {
+					multis.download(obj, callback);
+				});
 			},
 			BlofeldSoundset, {
 				obj.blofeld = this;
@@ -172,11 +180,11 @@ Blofeld {
 				obj.blofeld = this;
 				obj.downloadAll(callback);
 			},
-			BlofeldWavetable, {
-				Error("Blofeld does not support wavetable download").throw;
-			},
 			BlofeldGlobal, {
+				obj.blofeld = this;
 				obj.download(callback);
+			}, {
+				Error("% download not supported".format(obj.class.asString)).throw;
 			}
 		);
 	}
@@ -191,18 +199,29 @@ Blofeld {
 				});
 			},
 			BlofeldMulti, {
-				if (obj.isEditBuffer, {
+				obj.blofeld = this;
 					editBuffer.uploadMulti(obj);
 				}, {
 					multis.upload(obj);
 				});
 			},
-			BlofeldWavetable, {
+			BlofeldSoundset, {
+				obj.blofeld = this;
+				obj.uploadAll(callback);
+			},
+			BlofeldMultiset, {
+				obj.blofeld = this;
+				obj.uploadAll(callback);
+			},
+			BlofeldGlobal, {
 				obj.blofeld = this;
 				obj.upload(callback);
 			},
-			BlofeldGlobal, {
+			BlofeldWavetable, {
+				obj.blofeld = this;
 				obj.upload(callback);
+			}, {
+				Error("% upload not supported".format(obj.class.asString)).throw;
 			}
 		);
 	}
@@ -220,15 +239,105 @@ Blofeld {
 	}
 
 	control { |param, value = 0, chan = 0|
-		var bParam = BlofeldParam.byName[param];
-		if (bParam != nil && bParam.control != nil, {
+		var bParam = BlofeldControlParams.byName[param];
+		if (bParam != nil) {
 			midiOut.control(chan, bParam.control, value.asInteger.min(127).max(0));
+		};
+	}
+
+	sysex { |packet|
+		packet = packet.addFirst(BlofeldSysex.sysexBegin);
+		packet = packet.add(BlofeldSysex.sysexEnd);
+		midiOut.sysex(packet);
+	}
+
+	paramChange { |bParam, value, location|
+		if (bParam.control != nil, {
+			midiOut.control(location, bParam.control, value);
+		}, {
+			this.sysex(BlofeldSysex.paramChangePacket(bParam, value, location, deviceID));
 		});
 	}
 
+	soundRequest { |bank, slot, callback|
+		var key = Blofeld.soundKey(bank, slot, deviceID);
+		if (bank != allSoundsBank) {
+			BlofeldSysex.callbacks.put(key, { |bank, slot, data|
+				callback.value(bank, slot, data);
+				BlofeldSysex.callbacks.removeAt(key);
+			});
+		} {
+			Blofeld.bank.values.sort.do { |b|
+				128.do { |i|
+					BlofeldSysex.callbacks.put(key, { |bank, slot, data|
+						callback.value(bank, slot, data);
+						BlofeldSysex.callbacks.removeAt(key);
+					});
+				}
+			};
+		};
+		this.sysex(BlofeldSysex.soundRequestPacket(bank, slot, deviceID));
+	}
+
+	soundDump { |sound|
+		this.sysex(BlofeldSysex.soundDumpPacket(sound, deviceID));
+	}
+
+	multiRequest { |slot, bank, callback|
+		var key = Blofeld.multiKey(bank, slot, deviceID);
+		if (bank != allMultisBank) {
+			BlofeldSysex.callbacks.put(key, { |slot, bank, data|
+				callback.value(slot, bank, data);
+				BlofeldSysex.callbacks.removeAt(key);
+			});
+		} {
+			16.do { |i|
+				BlofeldSysex.callbacks.put(key, { |slot, bank, data|
+					callback.value(slot, bank, data);
+					BlofeldSysex.callbacks.removeAt(key);
+				});
+			};
+		};
+		this.sysex(BlofeldSysex.multiRequestPacket(slot, bank, deviceID));
+	}
+
+	multiDump { |multi|
+		this.sysex(BlofeldSysex.multiDumpPacket(multi, deviceID));
+	}
+
+	globalRequest { |callback|
+		var key = globalKey(deviceID);
+		BlofeldSysex.callbacks.put(key, { |data|
+			callback.value(data);
+			BlofeldSysex.callbacks.removeAt(key);
+		});
+		this.sysex(BlofeldSysex.globalRequestPacket(deviceID));
+	}
+
+	globalDump { |global|
+		this.sysex(BlofeldSysex.globalDumpPacket(global, deviceID));
+	}
+
+	wavetableDump { |slot, samples, ascii, wave, mult|
+		this.sysex(BlofeldSysex.wavetableDumpPacket(slot, samples, ascii, wave, mult, deviceID));
+	}
+
 	*key { |bank = 0x7F, program = 0x00|
-		var key = this.bank.findKeyForValue(bank) ++ program;
+		var label = this.bank.findKeyForValue(bank) ? bank.asString;
+		var key = label ++ program;
 		^key.asSymbol;
+	}
+
+	*soundKey { |bank, slot, deviceID|
+		^("sound_%_%".format(this.key(bank, slot), deviceID)).asSymbol;
+	}
+
+	*multiKey { |bank, slot, deviceID|
+		^("multi_%_%".format(this.key(bank, slot), deviceID)).asSymbol;
+	}
+
+	*globalKey { |deviceID|
+		^("global_%".format(deviceID)).asSymbol;
 	}
 
 	*initDictionaries {
@@ -594,7 +703,7 @@ Blofeld {
 
 + Panola {
 	asBlofeldPbind {|chan = 0, props = nil|
-		props = props ?? [];
+		props = props ? [];
 		^Pbindf(this.asPbind({}),
 			\type, \blofeld,
 			\chan, chan,

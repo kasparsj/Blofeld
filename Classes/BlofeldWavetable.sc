@@ -150,7 +150,7 @@ BlofeldWavetable {
 		this.checkForErrors;
 		this.fixSignalSize;
 		64.do({ |i|
-			blofeld.midiOut.sysex(BlofeldSysex.wavetableDumpPacket(slot, signal[(128*i*numChannels)..(128*(i+1)*numChannels-1)], displayName.ascii, i, numChannels, blofeld.deviceID));
+			blofeld.wavetableDump(slot, signal[(128*i*numChannels)..(128*(i+1)*numChannels-1)], displayName.ascii, i, numChannels);
 		});
 		if (callback != nil, { callback.value });
 	}

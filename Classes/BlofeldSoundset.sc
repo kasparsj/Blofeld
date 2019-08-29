@@ -1,6 +1,4 @@
 BlofeldSoundset {
-	const <allSoundsBank = 0x40;
-
 	classvar <loaded;
 	classvar <files;
 
@@ -36,8 +34,10 @@ BlofeldSoundset {
 	}
 
 	*load { |path, reload = false|
-		var name = path.asPathName.fileNameWithoutExtension.asSymbol;
-		var obj = loaded[name];
+		var name, obj;
+		path = if (files[path] != nil, { files[path] }, { path });
+		name = path.asPathName.fileNameWithoutExtension.asSymbol;
+		obj = loaded[name];
 		if ((obj == nil) || reload) {
 			obj = this.new;
 			if (path.extension.toLower == "mid") {
@@ -130,7 +130,7 @@ BlofeldSoundset {
 	}
 
 	add { |sound|
-		sounds.put(sound.key, sound);
+		sounds.put(Blofeld.key(sound.bank, sound.program), sound);
 		sound.soundset = this;
 	}
 
@@ -159,7 +159,7 @@ BlofeldSoundset {
 		if (path.extension.toLower == "mid", {
 			var midiFile = SimpleMIDIFile.new(path);
 			sorted.do { |sound|
-				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID, false);
+				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID);
 				// prefix with [track, absTime]
 				midiFile.addSysexEvent([0, 0] ++ packet);
 			};
@@ -167,7 +167,7 @@ BlofeldSoundset {
 		}, {
 			var sysexFile = SysexFile.new(path);
 			sorted.do { |sound|
-				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID, false);
+				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID);
 				sysexFile.addEvent(packet);
 			};
 			sysexFile.write;
@@ -175,20 +175,14 @@ BlofeldSoundset {
 	}
 
 	download { |sound, callback = nil|
-		BlofeldSysex.soundDumpCallback.put(sound.key, this.expect(callback));
-		blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(sound.bank, sound.program, blofeld.deviceID));
+		blofeld.soundRequest(sound.bank, sound.program, this.onSoundDump(callback));
 	}
 
 	downloadAll { |callback = nil|
 		var r = Routine({
-			Blofeld.bank.values.sort.do { |b|
-				128.do { |i|
-					BlofeldSysex.soundDumpCallback.put(Blofeld.key(b, i), this.expect(callback));
-				}
-			};
-			blofeld.midiOut.sysex(BlofeldSysex.soundRequestPacket(allSoundsBank, 0x00, blofeld.deviceID));
+			blofeld.soundRequest(Blofeld.allSoundsBank, 0x00, this.onSoundDump);
 			(Blofeld.bank.size*128).wait;
-			if (callback != nil, { callback.value });
+			if (callback != nil, { callback.value(this) });
 		});
 		r.play;
 		^r;
@@ -196,7 +190,7 @@ BlofeldSoundset {
 
 	upload { |sound, callback = nil|
 		var r = Routine({
-			blofeld.midiOut.sysex(BlofeldSysex.soundDumpPacket(sound, blofeld.deviceID));
+			blofeld.soundDump(sound);
 			this.add(sound);
 			if (callback != nil, {
 				1.wait;
@@ -218,18 +212,17 @@ BlofeldSoundset {
 					});
 				};
 			};
-			if (callback != nil, { callback.value });
+			if (callback != nil, { callback.value(this) });
 		});
 		r.play;
 		^r;
 	}
 
-	expect { |callback = nil|
+	onSoundDump { |callback = nil|
 		^{|bank, program, data|
 			var sound = this.getOrCreate(bank, program);
 			sound.data = data;
 			if (callback != nil, { callback.value(sound); });
-			BlofeldSysex.soundDumpCallback.removeAt(sound.key);
 		}
 	}
 }
