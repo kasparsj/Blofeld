@@ -114,7 +114,7 @@ Pdef(\blofeldFilterExample).stop;
 		//high index wavetables tend to have sharp angles and corners
 		{[\sine,0,exprand(1,20) * [1,-1].choose].wchoose([9-i,3,i].normalizeSum)}.dup(numSegs)
 	});
-	wavetable.setSlot(80+i).setName("sine wt"+(i+1));
+	wavetable.slot_(80+i).displayName_("sine wt"+(i+1));
 	~blofeld.upload(wavetable);
 };
 r = Routine({
