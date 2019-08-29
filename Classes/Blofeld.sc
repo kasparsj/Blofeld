@@ -201,7 +201,8 @@ Blofeld {
 			BlofeldMulti, {
 				obj.blofeld = this;
 				if (obj.isEditBuffer, {
-					editBuffer.uploadMulti(obj);
+					editBuffer.multi = obj;
+					editBuffer.uploadMulti;
 				}, {
 					multis.upload(obj);
 				});

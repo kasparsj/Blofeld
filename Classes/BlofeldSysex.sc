@@ -44,7 +44,7 @@ BlofeldSysex {
 				multiDumpIDM, {
 					var bank = packet[5];
 					var slot = packet[6];
-					var data = packet[7..424];
+					var data = packet[7..422];
 					var key = Blofeld.multiKey(bank, slot, deviceID);
 					callbacks[key].value(slot, bank, data);
 				},
@@ -126,7 +126,7 @@ BlofeldSysex {
 		packet = packet.add(deviceID);
 		packet = packet.add(multiDumpIDM);
 		packet = packet.addAll(data);
-		packet = packet.add(this.checksum(data));
+		packet = packet.add(this.checksum(data[2..]));
 		^packet;
 	}
 

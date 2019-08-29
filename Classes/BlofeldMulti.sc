@@ -9,7 +9,7 @@ BlofeldMulti {
 	var <>multiset;
 
 	*new { |slot, bank = 0x00, data = nil|
-		^super.newCopyArgs(slot, bank, Array.newClear(16), data);
+		^super.newCopyArgs(slot, bank, data);
 	}
 
 	get { |param|
@@ -39,6 +39,7 @@ BlofeldMulti {
 
 	asInt8Array {
 		var packet = Int8Array.new;
+		packet = packet.add(bank);
 		packet = packet.add(slot);
 		packet = packet.addAll(data);
 		^packet;

@@ -3,10 +3,10 @@ BlofeldEditBuffer {
 
 	var <blofeld;
 	var <parts;
-	var <multi;
+	var <>multi;
 
 	*new { |blofeld|
-		^super.newCopyArgs(blofeld, Array.newClear(16), BlofeldMulti.new(0, editBufferBank));
+		^super.newCopyArgs(blofeld, Array.newClear(16), nil);
 	}
 
 	get { |param, location = 0|
@@ -18,11 +18,11 @@ BlofeldEditBuffer {
 	set { |param, value = 0, location = 0, useCache = false|
 		var bParam = BlofeldSound.byName[param];
 		if (bParam != nil) {
-			this.setSoundParam(bParam, value, location, useCache);
+			^this.setSoundParam(bParam, value, location, useCache);
 		} {
 			bParam = BlofeldMulti.byName[param];
 			if (bParam != nil) {
-				this.setMultiParam(bParam, value, location, useCache);
+				^this.setMultiParam(bParam, value);
 			} {
 				Error("Invalid param %".format(param)).throw;
 			};
@@ -47,8 +47,28 @@ BlofeldEditBuffer {
 		^value;
 	}
 
-	setMultiParam { |bParam, value = 0, location = 0, useCache = false|
-		// todo: implement
+	setMultiParam { |bParam, value = 0|
+		value = bParam.value(value.asInteger);
+		^if (multi == nil, {
+			this.downloadMulti({
+				Routine({
+					1.wait;
+					this.doSetMultiParam_(bParam, value);
+				}).play;
+			});
+			value;
+		}, {
+			this.doSetMultiParam_(bParam, value);
+		});
+	}
+
+	doSetMultiParam_ { |bParam, value|
+		var uploadChange = (multi.data[bParam.sysex] != value);
+		multi.data[bParam.sysex] = value;
+		if (uploadChange, {
+			this.uploadMulti;
+		});
+		^value;
 	}
 
 	download { |callback = nil, location = 0|
@@ -71,6 +91,14 @@ BlofeldEditBuffer {
 				blofeld.soundDump(sound);
 				1.wait;
 			};
+			if (callback != nil, { callback.value });
+		}).play;
+	}
+
+	uploadMulti { |callback = nil|
+		^Routine({
+			blofeld.multiDump(multi);
+			2.wait;
 			if (callback != nil, { callback.value });
 		}).play;
 	}
@@ -124,7 +152,11 @@ BlofeldEditBuffer {
 
 	onMultiDump { |callback = nil|
 		^{|slot, bank, data|
-			this.multi.data = data;
+			if (multi == nil) {
+				multi = BlofeldMulti.new(0, editBufferBank, data);
+			} {
+				multi.data = data;
+			};
 			if (callback != nil, { callback.value(this.multi); });
 		}
 	}
