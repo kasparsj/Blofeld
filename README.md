@@ -22,7 +22,7 @@ var program = rrand(0, 127);
 	sound.get(\filter1Type).postln;
 });
 // print implemented param names
-BlofeldParam.byName.keys.postln;
+BlofeldSound.byName.keys.postln;
 ```
 ### init sound
 ```supercollider
