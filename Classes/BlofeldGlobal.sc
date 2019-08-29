@@ -28,7 +28,7 @@ BlofeldGlobal {
 	}
 
 	download { |callback = nil|
-		blofeld.globalRequest(this, this.expect(callback));
+		blofeld.globalRequest(this.onGlobalDump(callback));
 	}
 
 	upload { |callback = nil|
@@ -64,11 +64,11 @@ BlofeldGlobal {
 		^value;
 	}
 
-	expect { |callback = nil|
+	onGlobalDump { |callback = nil|
 		^{|packetData|
 			data = packetData;
 			if (callback != nil, { callback.value(this); });
-		}
+		};
 	}
 
 	asInt8Array {

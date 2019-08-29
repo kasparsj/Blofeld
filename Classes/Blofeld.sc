@@ -307,7 +307,7 @@ Blofeld {
 	}
 
 	globalRequest { |callback|
-		var key = globalKey(deviceID);
+		var key = Blofeld.globalKey(deviceID);
 		BlofeldSysex.callbacks.put(key, { |data|
 			callback.value(data);
 			BlofeldSysex.callbacks.removeAt(key);
