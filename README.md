@@ -131,14 +131,7 @@ r.play;
 // multimode needs to be switched on manually
 //~blofeld.multiMode(true); // <- will give you an error
 // initialize first 10 channels
-r = Routine({
-	10.do({ |i|
-		("init sound"+i).postln;
-		~blofeld.editBuffer.init(i);
-		1.wait;
-	});
-});
-r.play;
+~blofeld.editBuffer.init({ "init sound finished".postln }, i, num: 10);
 )
 
 (
