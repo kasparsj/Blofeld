@@ -68,7 +68,7 @@ BlofeldWavetableBrowser {
 	createFooter {
 		nameField = TextField(window);
 		nameField.action = { |v|
-			currentWavetable.displayName = v.item.asString;
+			currentWavetable.displayName = v.value.asString;
 		};
 		slotMenu = PopUpMenu(window);
 		slotMenu.items = (80..118);

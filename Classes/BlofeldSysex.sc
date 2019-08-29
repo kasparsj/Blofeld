@@ -131,7 +131,7 @@ BlofeldSysex {
 	}
 
 	*wavetableDumpPacket { |slot, samples, ascii, wave, mult = 1, deviceID = 0x00|
-		var packet = Int8Array.new();
+		var packet = Int8Array.new;
 		packet = packet.add(waldorfID);
 		packet = packet.add(blofeldID);
 		packet = packet.add(deviceID);
@@ -149,7 +149,7 @@ BlofeldSysex {
 		});
 		packet = packet.add(0x00); // reserved
 		packet = packet.add(0x00); // reserved
-		packet = packet.add(this.checksum(packet[7..407]));
+		packet = packet.add(this.checksum(packet[6..]));
 		^packet;
 	}
 
@@ -173,7 +173,7 @@ BlofeldSysex {
 		if (value < 0, {
 			arr = arr.add((value & 0x000FC000) >> 14 + 0x40);
 			}, {
-				arr = arr.add((value & 0x000FC000) >> 14);
+			arr = arr.add((value & 0x000FC000) >> 14);
 		});
 		arr = arr.add((value & 0x00003F80) >> 7);
 		arr = arr.add((value & 0x0000007F));

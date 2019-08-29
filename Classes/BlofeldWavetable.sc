@@ -149,10 +149,13 @@ BlofeldWavetable {
 		var numChannels = this.numChannels;
 		this.checkForErrors;
 		this.fixSignalSize;
-		64.do({ |i|
-			blofeld.wavetableDump(slot, signal[(128*i*numChannels)..(128*(i+1)*numChannels-1)], displayName.ascii, i, numChannels);
-		});
-		if (callback != nil, { callback.value });
+		Routine({
+			64.do({ |i|
+				blofeld.wavetableDump(slot, signal[(128*i*numChannels)..(128*(i+1)*numChannels-1)], displayName.ascii, i, numChannels);
+			});
+			12.wait;
+			if (callback != nil, { callback.value });
+		}).play;
 	}
 
 	validate {
