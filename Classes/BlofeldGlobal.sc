@@ -7,12 +7,16 @@ BlofeldGlobal {
 	var <data;
 
 	*new { |blofeld = nil|
-		^super.newCopyArgs(blofeld, Int8Array.new, ());
+		^super.newCopyArgs(blofeld, Array.newClear(72));
 	}
 
 	get { |param|
 		var bParam = byName[param];
-		var value = if (bParam != nil && bParam.sysex != nil, { data[bParam.sysex] }, { nil });
+		var value = if (bParam != nil && bParam.sysex != nil, {
+			data[bParam.sysex];
+		}, {
+			nil;
+		});
 		^value;
 	}
 
@@ -32,6 +36,22 @@ BlofeldGlobal {
 	}
 
 	upload { |callback = nil|
+		if (data[0] == nil) {
+			var newData = data.copy;
+			this.download({
+				newData.collect { |value, i|
+					if (value != nil) {
+						data[i] = value;
+					}
+				};
+				this.doUpload_(callback);
+			});
+		} {
+			this.doUpload_(callback);
+		};
+	}
+
+	doUpload_ { |callback = nil|
 		var r = Routine({
 			blofeld.globalDump(this);
 			if (callback != nil, {
