@@ -161,7 +161,7 @@ BlofeldSysex {
 		packet = packet.add(deviceID);
 		packet = packet.add(soundDumpIDM);
 		packet = packet.addAll(data);
-		packet = packet.add(this.checksum(data));
+		packet = packet.add(this.checksum(data[2..]));
 		^packet;
 	}
 

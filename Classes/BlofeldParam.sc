@@ -5,12 +5,14 @@ BlofeldParam {
 	var <values;
 	var <defaultValue;
 	var <relParam;
+	var <>groupClass;
 	var <>sequential = true;
 
 	*initGroup { |groupClass|
 		groupClass.byName = ();
 		groupClass.bySysex = ();
 		groupClass.params.do { |param|
+			param.groupClass = groupClass;
 			groupClass.byName.put(param.name, param);
 			groupClass.bySysex.put(param.sysex, param);
 		};
@@ -54,7 +56,7 @@ BlofeldParam {
 	isSet { |data|
 		var set = if (data[sysex] != defaultValue, {
 			if (relParam != nil, {
-				BlofeldParam.byName[relParam].isSet(data);
+				groupClass.byName[relParam].isSet(data);
 			}, {
 				true;
 			});

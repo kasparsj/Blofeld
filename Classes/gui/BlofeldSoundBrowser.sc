@@ -240,15 +240,19 @@ BlofeldSoundBrowser {
 				parent: body,
 				bounds: Point.new(buttonWidth, buttonHeight),
 			)
-			.action_({ |button|
-				if (button.string.size > 0, {
-					currentSound = soundsArray[buttonArray.indexOf(button)];
-					currentSoundText.string = button.string;
-					currentSoundInfoText.string = currentSound.getInfo();
-					blofeld.editBuffer.upload(currentSound);
-				});
-			});
+			.action_(this.onClickButton);
 		});
+	}
+
+	onClickButton {
+		^{ |button|
+			if (button.string.size > 0, {
+				currentSound = soundsArray[buttonArray.indexOf(button)];
+				currentSoundText.string = button.string;
+				currentSoundInfoText.string = currentSound.getInfo();
+				blofeld.editBuffer.upload(currentSound);
+			});
+		}
 	}
 
 	createFooter {

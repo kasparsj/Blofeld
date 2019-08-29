@@ -200,6 +200,7 @@ Blofeld {
 			},
 			BlofeldMulti, {
 				obj.blofeld = this;
+				if (obj.isEditBuffer, {
 					editBuffer.uploadMulti(obj);
 				}, {
 					multis.upload(obj);
@@ -222,7 +223,7 @@ Blofeld {
 				obj.upload(callback);
 			}, {
 				Error("% upload not supported".format(obj.class.asString)).throw;
-			}
+			};
 		);
 	}
 
