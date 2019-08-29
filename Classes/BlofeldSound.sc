@@ -24,7 +24,11 @@ BlofeldSound {
 
 	randomize { |group = nil, name = "random", cat = \init|
 		params.do { |bParam|
-			if ((group == nil) || (bParam.name.asString.beginsWith(group))) {
+			var include = true;
+			if (group != nil) {
+				include = bParam.name.asString.beginsWith(group.asString);
+			};
+			if (include) {
 				data[bParam.sysex] = bParam.choose;
 			};
 		};
