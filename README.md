@@ -22,7 +22,7 @@ var program = rrand(0, 127);
 	sound.get(\filter1Type).postln;
 });
 // print implemented param names
-BlofeldParam.byName.keys.postln;
+BlofeldSound.byName.keys.postln;
 ```
 ### init sound
 ```supercollider
@@ -114,7 +114,7 @@ Pdef(\blofeldFilterExample).stop;
 		//high index wavetables tend to have sharp angles and corners
 		{[\sine,0,exprand(1,20) * [1,-1].choose].wchoose([9-i,3,i].normalizeSum)}.dup(numSegs)
 	});
-	wavetable.setSlot(80+i).setName("sine wt"+(i+1));
+	wavetable.slot_(80+i).displayName_("sine wt"+(i+1));
 	~blofeld.upload(wavetable);
 };
 r = Routine({
@@ -131,14 +131,7 @@ r.play;
 // multimode needs to be switched on manually
 //~blofeld.multiMode(true); // <- will give you an error
 // initialize first 10 channels
-r = Routine({
-	10.do({ |i|
-		("init sound"+i).postln;
-		~blofeld.editBuffer.init(i);
-		1.wait;
-	});
-});
-r.play;
+~blofeld.editBuffer.init({ "init sound finished".postln }, i, num: 10);
 )
 
 (
