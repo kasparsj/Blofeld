@@ -51,7 +51,7 @@ BlofeldMultiset {
 	downloadAll { |callback|
 		var r = Routine({
 			blofeld.multiRequest(0x00, Blofeld.allMultisBank, this.onMultiDump);
-			(Blofeld.bank.size*16).wait;
+			128.wait;
 			if (callback != nil, { callback.value(this) });
 		});
 		r.play;
