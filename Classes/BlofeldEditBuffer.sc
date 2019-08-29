@@ -56,7 +56,7 @@ BlofeldEditBuffer {
 	}
 
 	downloadMulti { |callback = nil|
-		blofeld.multiRequest(0, editBufferBank, blofeld.deviceID, this.onMultiDump(callback));
+		blofeld.multiRequest(0, editBufferBank, this.onMultiDump(callback));
 	}
 
 	upload { |sounds, callback = nil, location = 0|
