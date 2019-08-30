@@ -41,7 +41,17 @@ BlofeldParam {
 	}
 
 	value { |value|
-		^if (sequential, { value.min(this.max).max(this.min) }, { this.nearest(value) });
+		if (value.isSymbol && values[value] != nil) {
+			value = values[value];
+		} {
+			value = value.asInteger;
+			value = if (sequential, {
+				value.min(this.max).max(this.min);
+			}, {
+				this.nearest(value);
+			});
+		};
+		^value;
 	}
 
 	label { |value|
@@ -133,4 +143,12 @@ BlofeldParam {
 	asString {
 		^name;
 	}
+}
+
++Object {
+	isSymbol { ^false } // prevent duplicate with wesleyan build ConnectCVToNodes
+}
+
++Symbol {
+	isSymbol { ^true }
 }

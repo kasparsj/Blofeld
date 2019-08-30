@@ -277,7 +277,7 @@ BlofeldSound {
 			BlofeldParam.new(\osc1BendRange, 4, nil, Blofeld.m24p24, 64),
 			BlofeldParam.new(\osc1Keytrack, 5, nil, Blofeld.m200p196perc, 64),
 			BlofeldParam.new(\osc1FMSource, 6, nil, Blofeld.fmSource, 0, \osc1FMAmount),
-			BlofeldParam.new(\osc3FMAmount, 7, 30, (0..127)),
+			BlofeldParam.new(\osc1FMAmount, 7, 30, (0..127)),
 			BlofeldParam.new(\osc1Shape, 8, 31, Blofeld.shape),
 			BlofeldParam.new(\osc1Pulsewidth, 9, 33, (0..127)),
 			BlofeldParam.new(\osc1PWMSource, 10, nil, Blofeld.modSource, 0, \osc1PWMAmount),

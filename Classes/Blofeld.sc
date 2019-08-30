@@ -110,6 +110,10 @@ Blofeld {
 		midiOut = MIDIOut.newByName(deviceName, portName);
 	}
 
+	isConnected {
+		^(midiOut != nil);
+	}
+
 	makeDefault {
 		Event.addParentType(\blofeld, (blofeld: this));
 	}

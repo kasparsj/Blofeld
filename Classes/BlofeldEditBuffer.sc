@@ -32,7 +32,7 @@ BlofeldEditBuffer {
 	setSoundParam { |bParam, value = 0, location = 0, useCache = false|
 		var sound = parts[location];
 		var uploadChange = useCache.not || (sound == nil);
-		value = bParam.value(value.asInteger);
+		value = bParam.value(value);
 		if (sound == nil, {
 			sound = BlofeldSound.new(editBufferBank, location);
 		});
