@@ -41,8 +41,12 @@ BlofeldParam {
 	}
 
 	value { |value|
-		if (value.isSymbol && values[value] != nil) {
-			value = values[value];
+		if (value.isSymbol) {
+			if (values[value] != nil) {
+				value = values[value];
+			} {
+				Error("Invalid symbol value: '%', for param: '%'".format(value, name)).throw;
+			};
 		} {
 			value = value.asInteger;
 			value = if (sequential, {
