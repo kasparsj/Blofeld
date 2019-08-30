@@ -40,7 +40,19 @@ BlofeldSound {
 		var bParam = byName[param];
 		var value = if (bParam != nil, {
 			if (bParam.sysex != nil, { data[bParam.sysex] });
-		}, { nil });
+		}, {
+			nil;
+		});
+		^value;
+	}
+
+	set { |param, value|
+		var bParam = byName[param];
+		value = if (bParam != nil, {
+			data[bParam.sysex] = bParam.value(value);
+		}, {
+			nil;
+		});
 		^value;
 	}
 
@@ -64,7 +76,7 @@ BlofeldSound {
 		var bParam = byName[param];
 		var value = nil;
 		if (bParam != nil, {
-			value = bParam.rand();
+			value = bParam.choose;
 			data[bParam.sysex] = value;
 		});
 		^value;

@@ -247,7 +247,7 @@ Blofeld {
 	control { |param, value = 0, chan = 0|
 		var bParam = BlofeldControlParams.byName[param];
 		if (bParam != nil) {
-			midiOut.control(chan, bParam.control, value.asInteger.min(127).max(0));
+			midiOut.control(chan, bParam.control, bParam.value(value));
 		};
 	}
 
