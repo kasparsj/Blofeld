@@ -45,6 +45,8 @@ Blofeld {
 	var <global;
 	var <editBuffer;
 	var <midiOut;
+	var <midiOn;
+	var <midiOff;
 	var soundBrowser;
 	var wavetableBrowser;
 
@@ -96,6 +98,13 @@ Blofeld {
 		if (Blofeld.numInstances == 1, {
 			this.makeDefault();
 		});
+		CmdPeriod.add { this.deinit(); }
+	}
+
+	deinit {
+		this.control(\allNotesOff);
+		midiOn.free;
+		midiOff.free;
 	}
 
 	connect { |deviceName, portName, forceInit = false|
@@ -113,6 +122,15 @@ Blofeld {
 
 	isConnected {
 		^(midiOut != nil);
+	}
+
+	midiFunc {
+		midiOn = MIDIFunc.noteOn({ |vel, num, chan, src|
+			this.noteOn(num, vel, chan);
+		});
+		midiOff = MIDIFunc.noteOff({ |vel, num, chan, src|
+			this.noteOff(num, vel, chan);
+		});
 	}
 
 	makeDefault {
