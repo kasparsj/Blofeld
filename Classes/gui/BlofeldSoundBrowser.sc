@@ -9,7 +9,8 @@ BlofeldSoundBrowser {
 	var <keyboard;
 	var <footer1, <footer2;
 	var <currentSoundText;
-	var <currentSoundInfoText;
+	var <currentSoundNameText, <currentSoundSetText, <currentSoundLocationText, <currentSoundInfoText;
+	var <currentSoundFilterEnv, <currentSoundAmpEnv;
 	var <leftButton, <rightButton;
 	var <sidebar;
 
@@ -27,7 +28,7 @@ BlofeldSoundBrowser {
 
 	const windowWidth = 960;
 	const windowHeight = 480;
-	const sidebarWidth = 160;
+	const sidebarWidth = 240;
 	const gap = 5;
 	const margin = 10;
 
@@ -35,16 +36,15 @@ BlofeldSoundBrowser {
 	classvar <categories;
 	classvar <soundsets;
 	classvar <numberOfRows = 10;
-	classvar <numberOfColumns = 5;
+	classvar <numberOfColumns = 4;
+	classvar <buttonsPerPage;
 	classvar <buttonWidth;
 	classvar <buttonHeight;
 	classvar <backgrounds;
 	classvar <soundsCache;
 
 	*initClass {
-		Class.initClassTree(Blofeld);
-		Class.initClassTree(BlofeldSoundset);
-
+		buttonsPerPage = (numberOfRows * numberOfColumns);
 		buttonWidth = windowWidth - sidebarWidth - (margin * 2) - (numberOfColumns * (gap - 1)) / numberOfColumns;
 		buttonHeight = 25; //(windowHeight * 0.75) / numberOfRows;
 		backgrounds = (
@@ -126,7 +126,6 @@ BlofeldSoundBrowser {
 	createHeader {
 		header = CompositeView.new(window, Rect.new(margin, margin, windowWidth - sidebarWidth - (margin * 2), 50));
 
-		// StaticText goes first so EZPopUpMenu stays on top
 		StaticText.new(
 			parent: header,
 			bounds: Rect(0, 0, header.bounds.width, header.bounds.height))
@@ -134,6 +133,13 @@ BlofeldSoundBrowser {
 		// .background_(Color.green(0.5, 0.2))
 		.align_(\topRight)
 		.font_(Font(Font.default, size: 24, bold: true));
+
+		StaticText.new(
+			parent: header,
+			bounds: Rect(0, 0, header.bounds.width, header.bounds.height - 10))
+		.string_(if (blofeld.isConnected, { "connected" }, { "not connected" }))
+		.align_(\bottomRight)
+		.stringColor_(if (blofeld.isConnected, { Color.green }, { Color.red }));
 
 		categoriesMenu = EZPopUpMenu.new(
 			parentView: header,
@@ -195,13 +201,13 @@ BlofeldSoundBrowser {
 			button.string = "";
 			//button.background = nil;
 		});
-		soundsArray = Array.newClear(50);
+		soundsArray = Array.newClear(buttonsPerPage);
 		currentSounds = soundsCache.select({ |sound|
 			var accept = (sound.get(\category) == (if (currentCategory != \all, { Blofeld.category[currentCategory.asSymbol] }, { sound.get(\category) }))) &&
 			(sound.soundset.name == (if (currentSoundset != \all, { currentSoundset.asSymbol }, { sound.soundset.name }))) &&
 			(if (searchText.size > 0, { sound.getName().containsi(searchText) }, { true }));
 			if (accept, {
-				if ((totalCount >= (50*(currentPage-1))) && (count < (50*currentPage)), {
+				if ((totalCount >= (buttonsPerPage*(currentPage-1))) && (count < (buttonsPerPage*currentPage)), {
 					count = count + 1;
 					totalCount = totalCount + 1;
 					accept;
@@ -215,14 +221,14 @@ BlofeldSoundBrowser {
 		}).sort({ |a, b|
 			a.getName() < b.getName();
 		});
-		(50.min(currentSounds.size)).do({|i|
+		(buttonsPerPage.min(currentSounds.size)).do({|i|
 			var sound = currentSounds[i];
 			var indexDownByColumn = i % numberOfRows * numberOfColumns + i.div(numberOfRows);
 			buttonArray[indexDownByColumn].string = sound.getName();
 			buttonArray[indexDownByColumn].background = backgrounds[sound.get(\category)];
 			soundsArray[indexDownByColumn] = sound;
 		});
-		numPages = (totalCount / 50).ceil.asInteger;
+		numPages = (totalCount / buttonsPerPage).ceil.asInteger;
 	}
 
 	updatePages {
@@ -235,7 +241,7 @@ BlofeldSoundBrowser {
 
 		body.decorator = FlowLayout(body.bounds, Point(margin, margin), Point(gap, gap));
 
-		buttonArray = 50.collect({ |i|
+		buttonArray = buttonsPerPage.collect({ |i|
 			Button.new(
 				parent: body,
 				bounds: Point.new(buttonWidth, buttonHeight),
@@ -248,11 +254,34 @@ BlofeldSoundBrowser {
 		^{ |button|
 			if (button.string.size > 0, {
 				currentSound = soundsArray[buttonArray.indexOf(button)];
-				currentSoundText.string = button.string;
-				currentSoundInfoText.string = currentSound.getInfo();
-				blofeld.editBuffer.upload(currentSound);
+				this.updateSound;
 			});
 		}
+	}
+
+	updateSound {
+		var filterEnv, ampEnv;
+		currentSoundText.string = currentSound.getName();
+		currentSoundNameText.string = currentSound.getName();
+		currentSoundSetText.string = currentSound.soundset.name.asString;
+		currentSoundLocationText.string = Blofeld.bank.findKeyForValue(currentSound.bank).asString.toUpper ++ (currentSound.program+1).asString.padLeft(3, "0") + ", category:" + currentSound.getCategory();
+
+		filterEnv = currentSound.getEnv("filterEnv") / 127.0;
+		filterEnv[0][1] = filterEnv[0][1]/3;
+		filterEnv[0][2] = filterEnv[0][2]/3 + (1/3);
+		filterEnv[0][3] = filterEnv[0][3]/3 + (2/3);
+		currentSoundFilterEnv.value = filterEnv;
+
+		ampEnv = currentSound.getEnv("ampEnv") / 127.0;
+		ampEnv[0][1] = ampEnv[0][1]/3;
+		ampEnv[0][2] = ampEnv[0][2]/3 + (1/3);
+		ampEnv[0][3] = ampEnv[0][3]/3 + (2/3);
+		currentSoundAmpEnv.value = ampEnv;
+
+		currentSoundInfoText.string = currentSound.getInfo();
+		if (blofeld.isConnected, {
+			blofeld.editBuffer.upload(currentSound);
+		});
 	}
 
 	createFooter {
@@ -275,7 +304,7 @@ BlofeldSoundBrowser {
 			bounds: Rect.new(
 				left: 0,
 				top: 0,
-				width: footer2.bounds.width / 9 * 2,
+				width: buttonWidth,
 				height: 50
 			)
 		)
@@ -285,14 +314,13 @@ BlofeldSoundBrowser {
 			currentPage = (currentPage - 1).max(1);
 			this.reloadSounds;
 			this.updatePages;
-		})
-		.front;
+		});
 
 		// keyboard
 		keyboard = MIDIKeyboard.new(footer2, Rect.new(
-			left: footer2.bounds.width / 3,
+			left: buttonWidth + gap,
 			top: 0,
-			width: footer2.bounds.width / 3,
+			width: footer2.bounds.width - (buttonWidth*2) - (gap*2),
 			height: 50
 		));
 		keyboard.keyDownAction_({ |note|
@@ -306,9 +334,9 @@ BlofeldSoundBrowser {
 		rightButton = Button.new(
 			parent: footer2,
 			bounds: Rect.new(
-				left: footer2.bounds.width / 9 * 7,
+				left: footer2.bounds.width - buttonWidth,
 				top: 0,
-				width: footer2.bounds.width / 9 * 2,
+				width: buttonWidth,
 				height: 50
 			)
 		)
@@ -318,20 +346,40 @@ BlofeldSoundBrowser {
 			currentPage = (currentPage + 1).min(numPages);
 			this.reloadSounds;
 			this.updatePages;
-		})
-		.front;
+		});
 	}
 
 	createSidebar {
 		sidebar = CompositeView.new(window, Rect.new(windowWidth - sidebarWidth, 0, sidebarWidth, windowHeight));
 
+		currentSoundNameText = StaticText.new(sidebar, Rect(0, 0, sidebar.bounds.width, 16))
+		.font_(Font(Font.default, size: 14, bold: true))
+		.string_("");
+
+		currentSoundSetText = StaticText.new(sidebar, Rect(0, 16, sidebar.bounds.width, 12))
+		.font_(Font(Font.default, size: 11, bold: false))
+		.string_("");
+
+		currentSoundLocationText = StaticText.new(sidebar, Rect(0, 28, sidebar.bounds.width, 12))
+		.font_(Font(Font.default, size: 11, bold: false))
+		.string_("");
+
+		StaticText(sidebar, Rect(0, 40, sidebar.bounds.width, 12))
+		.font_(Font(Font.default, size: 11, bold: false))
+		.string_("Filter Envelope");
+		currentSoundFilterEnv = EnvelopeView.new(sidebar, Rect(0, 52, sidebar.bounds.width, 50));
+
+		StaticText(sidebar, Rect(0, 102, sidebar.bounds.width, 12))
+		.font_(Font(Font.default, size: 11, bold: false))
+		.string_("Amp Envelope");
+		currentSoundAmpEnv = EnvelopeView.new(sidebar, Rect(0, 114, sidebar.bounds.width, 50));
+
 		currentSoundInfoText = StaticText.new(
-			parent: sidebar,
-			bounds: Rect(0, 0, sidebar.bounds.width, sidebar.bounds.height))
+			parent: ScrollView.new(sidebar, Rect.new(0, sidebar.bounds.height / 2, sidebar.bounds.width, sidebar.bounds.height / 2)).hasHorizontalScroller_(false),
+			bounds: Rect(0, 0, sidebar.bounds.width, windowHeight))
 		.string_("")
 		.background_(Color.gray(0.5, 0.2))
 		.align_(\topLeft)
-		.font_(Font(Font.default, size: 11, bold: false))
-		.front;
+		.font_(Font(Font.default, size: 11, bold: false));
 	}
 }

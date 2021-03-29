@@ -37,6 +37,7 @@ Blofeld {
 	classvar <channel;
 	classvar <tempo;
 	classvar <numInstances = 0;
+	classvar <>defaultChan = 0;
 
 	var <>deviceID;
 	var <sounds;
@@ -53,7 +54,7 @@ Blofeld {
 		this.initDictionaries();
 
 		Event.addEventType(\blofeld, { |server|
-			var chan = ~chan ? 0;
+			var chan = ~chan ? Blofeld.defaultChan;
 			var useCache = ~useCache ? true;
 			var uploadGlobal = false;
 			currentEnvironment.keys.do({ |key|
@@ -115,7 +116,10 @@ Blofeld {
 	}
 
 	makeDefault {
-		Event.addParentType(\blofeld, (blofeld: this));
+		if (Main.versionAtLeast( 3, 9 )) {
+		    Event.addParentType(\blofeld, (blofeld: this));
+		};
+		// todo: do we need to throw an error?
 	}
 
 	soundBrowser { |loadSoundsets = \all|
@@ -156,8 +160,8 @@ Blofeld {
 		this.program(program, chan);
 	}
 
-	selectRandomSound {
-		this.selectSound(rrand(0, Blofeld.bank.size-1), rrand(0, 127));
+	selectRandomSound { |chan = 0|
+		this.selectSound(rrand(0, Blofeld.bank.size-1), rrand(0, 127), chan);
 	}
 
 	download { |obj, callback = nil|
@@ -707,13 +711,16 @@ Blofeld {
 	}
 }
 
-+ Panola {
-	asBlofeldPbind {|chan = 0, props = nil|
-		props = props ? [];
-		^Pbindf(this.asPbind({}),
-			\type, \blofeld,
-			\chan, chan,
-			*props.flatten
-		);
+/*// todo: add dependency to Panola or remove
+if (Quarks.isInstalled("Panola").not) {
+	+ Panola {
+		asBlofeldPbind {|chan = 0, props = nil|
+			props = props ? [];
+			^Pbindf(this.asPbind({}),
+				\type, \blofeld,
+				\chan, chan,
+				*props.flatten
+			);
+		}
 	}
-}
+};*/

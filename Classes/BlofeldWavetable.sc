@@ -10,7 +10,7 @@ BlofeldWavetable {
 
 	*initClass {
 		var sep = thisProcess.platform.pathSeparator;
-		var filesDir = (this.filenameSymbol.asString.dirname.dirname ++ sep ++ "Wavetables").asPathName;
+		var filesDir = PathName(this.filenameSymbol.asString.dirname.dirname ++ sep ++ "Wavetables");
 		files = ();
 		loaded = ();
 		this.scanMidiFiles(filesDir, 1);
@@ -36,7 +36,7 @@ BlofeldWavetable {
 	}
 
 	*load { |path, reload = false, checkChecksum = true|
-		var name = path.asPathName.fileNameWithoutExtension.asSymbol;
+		var name = PathName(path).fileNameWithoutExtension.asSymbol;
 		var obj = loaded[name];
 		if ((obj == nil) || reload) {
 			var slot, displayName;

@@ -111,7 +111,7 @@ BlofeldEditBuffer {
 		^this.upload(parts[location..(location+num-1)], callback, location);
 	}
 
-	randomize { |callback = nil, location = 0, group = \sysex, num = 1|
+	randomize { |callback = nil, location = 0, group = nil, num = 1|
 		location = location ? 0;
 		num.do { |i|
 			this.getOrCreatePart((location + i)).randomize(group);

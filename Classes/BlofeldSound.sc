@@ -26,7 +26,16 @@ BlofeldSound {
 		params.do { |bParam|
 			var include = true;
 			if (group != nil) {
-				include = bParam.name.asString.beginsWith(group.asString);
+				var groups = if (group.isArray, group, [group]);
+				include = false;
+				block { |break|
+					groups.do { |g|
+						var paramName = bParam.name.asString;
+						var groupName = g.asString;
+						include = paramName.beginsWith(groupName);
+						if (include) { break.value };
+					}
+				}
 			};
 			if (include) {
 				data[bParam.sysex] = bParam.choose;
@@ -83,13 +92,7 @@ BlofeldSound {
 	}
 
 	getInfo { |fullInfo = false|
-		var info = this.getName() ++ "\n" ++
-		(if (soundset != nil, {
-			"soundset:" + soundset.name.asString ++ "\n" ++
-			"bank: " + bank + "program: " + program ++ "\n"
-		}, { "" })) ++
-		("category:" + this.getCategory()) ++ "\n" ++
-		this.getOscInfo("osc1", fullInfo) ++ "\n" ++
+		var info = this.getOscInfo("osc1", fullInfo) ++ "\n" ++
 		this.getOscInfo("osc2", fullInfo) ++ "\n" ++
 		this.getOscInfo("osc3", fullInfo) ++ "\n" ++
 		this.getFilterInfo("filter1", fullInfo) ++ "\n" ++
@@ -212,6 +215,12 @@ BlofeldSound {
 			msg = msg + this.printParams([(name++"Sync").asSymbol, (name++"Clocked").asSymbol, (name++"StartPhase").asSymbol, (name++"Keytrack").asSymbol, (name++"Delay").asSymbol, (name++"Fade").asSymbol]);
 		});
 		^msg;
+	}
+
+	getEnv { |name|
+		var adr = [0, this.getLabel((name++"Attack").asSymbol), this.getLabel((name++"Decay").asSymbol), this.getLabel((name++"Release").asSymbol)];
+		var levels = [0, this.getLabel((name++"AttackLevel").asSymbol), this.getLabel((name++"Sustain").asSymbol), 0];
+		^[adr, levels];
 	}
 
 	getEnvInfo { |name, fullInfo = false|

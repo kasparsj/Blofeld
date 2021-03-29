@@ -8,7 +8,7 @@ BlofeldSoundset {
 
 	*initClass {
 		var sep = thisProcess.platform.pathSeparator;
-		var filesDir = (this.filenameSymbol.asString.dirname.dirname ++ sep ++ "Soundsets").asPathName;
+		var filesDir = PathName(this.filenameSymbol.asString.dirname.dirname ++ sep ++ "Soundsets");
 		files = ();
 		loaded = ();
 		this.scanMidiFiles(filesDir, 1);
@@ -36,7 +36,7 @@ BlofeldSoundset {
 	*load { |path, reload = false|
 		var name, obj;
 		path = if (files[path] != nil, { files[path] }, { path });
-		name = path.asPathName.fileNameWithoutExtension.asSymbol;
+		name = PathName(path).fileNameWithoutExtension.asSymbol;
 		obj = loaded[name];
 		if ((obj == nil) || reload) {
 			obj = this.new;
