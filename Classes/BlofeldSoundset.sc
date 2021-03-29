@@ -40,7 +40,7 @@ BlofeldSoundset {
 		obj = loaded[name];
 		if ((obj == nil) || reload) {
 			obj = this.new;
-			if (path.extension.toLower == "mid") {
+			if (PathName(path).extension.toLower == "mid") {
 				var midiFile = SimpleMIDIFile.read(path);
 				midiFile.sysexEvents.do { |sysexEvent|
 					// 0 track
@@ -156,7 +156,7 @@ BlofeldSoundset {
 				a.bank < b.bank
 			});
 		});
-		if (path.extension.toLower == "mid", {
+		if (PathName(path).extension.toLower == "mid", {
 			var midiFile = SimpleMIDIFile.new(path);
 			sorted.do { |sound|
 				var packet = BlofeldSysex.soundDumpPacket(sound, deviceID);

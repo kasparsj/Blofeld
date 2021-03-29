@@ -102,7 +102,9 @@ Blofeld {
 	}
 
 	deinit {
-		this.control(\allNotesOff);
+		16.do { |i|
+			this.control(\allNotesOff, 0, i);
+		};
 		midiOn.free;
 		midiOff.free;
 	}

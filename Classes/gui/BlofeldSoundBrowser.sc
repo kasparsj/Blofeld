@@ -317,19 +317,21 @@ BlofeldSoundBrowser {
 		});
 
 		// keyboard
-		keyboard = MIDIKeyboard.new(footer2, Rect.new(
-			left: buttonWidth + gap,
-			top: 0,
-			width: footer2.bounds.width - (buttonWidth*2) - (gap*2),
-			height: 50
-		));
-		keyboard.keyDownAction_({ |note|
-			blofeld.midiOut.noteOn(0, note, 60);
-		});
-		keyboard.keyUpAction_({ |note|
-			blofeld.midiOut.noteOff(0, note, 60);
-		});
-		keyboard.setColor(60, Color.red);
+		if (Quarks.isInstalled("ixiViews")) {
+			keyboard = MIDIKeyboard.new(footer2, Rect.new(
+				left: buttonWidth + gap,
+				top: 0,
+				width: footer2.bounds.width - (buttonWidth*2) - (gap*2),
+				height: 50
+			));
+			keyboard.keyDownAction_({ |note|
+				blofeld.midiOut.noteOn(0, note, 60);
+			});
+			keyboard.keyUpAction_({ |note|
+				blofeld.midiOut.noteOff(0, note, 60);
+			});
+			keyboard.setColor(60, Color.red);
+		};
 
 		rightButton = Button.new(
 			parent: footer2,
