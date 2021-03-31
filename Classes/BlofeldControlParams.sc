@@ -9,7 +9,7 @@ BlofeldControlParams {
 			BlofeldParam.new(\bankMSB, nil, 0, (0..127)), //
 			BlofeldParam.new(\pan, nil, 10, (0..127)),
 			BlofeldParam.new(\expression, nil, 11, (0..127)),
-			BlofeldParam.new(\bankLSB, nil, 32, (0..7)), // (a...h)
+			BlofeldParam.new(\bankLSB, nil, 32, Blofeld.bank), // (a...h)
 			BlofeldParam.new(\pitchmod, nil, 50, (0..127)),
 			BlofeldParam.new(\sustainPedal, nil, 64, (0..127)),
 			BlofeldParam.new(\sustenuto, nil, 66, (0..127)),
