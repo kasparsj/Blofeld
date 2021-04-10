@@ -715,7 +715,7 @@ Blofeld {
 		);
 		octave = ();
 		9.do { |i|
-			octave.put(((128/(i*2)).asInteger.asString++"'").asSymbol, 16+(i*12));
+			octave.put(((128/2.pow(i)).asInteger.asString++"'").asSymbol, 16+(i*12));
 		};
 		channel = (
 			global: 0,

@@ -11,7 +11,7 @@ BlofeldSound {
 	var <>soundset;
 
 	*new { |bank, program, data = nil, soundset = nil|
-		^super.newCopyArgs(bank, program, if (data == nil, { initData.copy }, { data }), soundset);
+		^super.newCopyArgs(bank, program, if (data == nil, { Int8Array.newClear(initData.size) }, { data }), soundset);
 	}
 
 	isEditBuffer {
