@@ -715,7 +715,8 @@ Blofeld {
 		);
 		octave = ();
 		9.do { |i|
-			octave.put(((128/2.pow(i)).asInteger.asString++"'").asSymbol, 16+(i*12));
+			var name = if((128/2.pow(i)) > 1, (128/2.pow(i)).asInteger.asString, "1/2");
+			octave.put((name ++ "'").asSymbol, 16+(i*12));
 		};
 		channel = (
 			global: 0,

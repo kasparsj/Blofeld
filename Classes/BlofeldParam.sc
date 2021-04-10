@@ -41,7 +41,8 @@ BlofeldParam {
 	}
 
 	value { |value|
-		if (value.isSymbol) {
+		if (value.isSymbol || if (value.isString, { values[value.asSymbol] != nil }, false)) {
+			value = value.asSymbol;
 			if (values[value] != nil) {
 				value = values[value];
 			} {
