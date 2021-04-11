@@ -3,10 +3,11 @@ BlofeldEditBuffer {
 
 	var <blofeld;
 	var <parts;
+	var <routines;
 	var <>multi;
 
 	*new { |blofeld|
-		^super.newCopyArgs(blofeld, Array.newClear(16), nil);
+		^super.newCopyArgs(blofeld, Array.newClear(16), Array.newClear(16), nil);
 	}
 
 	get { |param, location = 0|
@@ -27,6 +28,38 @@ BlofeldEditBuffer {
 				Error("Invalid param %".format(param)).throw;
 			};
 		};
+	}
+
+	fromTo { |param, startValue, endValue, duration, location = 0, curve = \lin, step = 0.1|
+		var r = routines[location];
+		if (r != nil) {
+			if (r[param] != nil) {
+				r[param].stop;
+				r.removeAt(param);
+			};
+		} {
+			routines[location] = ();
+			r = routines[location];
+		};
+		r[param] = {
+			var env = Env([startValue, endValue], [duration], curve);
+			var time = 0;
+			while ({time <= duration}, {
+				this.set(param, env.at(time), location);
+				step.wait;		
+				time = time + step;
+			});
+			r.removeAt(param);
+		}.fork;
+		^r[param];
+	}
+
+	to { |param, endValue, duration, location = 0, curve = \lin, step = 0.1|
+		^this.fromTo(param, this.get(param, location), endValue, duration, location, curve, step);
+	}
+
+	from { |param, startValue, duration, location = 0, curve = \lin, step = 0.1|
+		^this.fromTo(param, startValue, this.get(param, location), duration, location, curve, step);
 	}
 
 	setSoundParam { |bParam, value = 0, location = 0, useCache = false|
