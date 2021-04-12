@@ -45,6 +45,7 @@ Blofeld {
 	var <multis;
 	var <global;
 	var <editBuffer;
+	var <aliases;
 	var <midiOut;
 	var <midiOn;
 	var <midiOff;
@@ -103,6 +104,7 @@ Blofeld {
 		multis = BlofeldMultiset.new(this);
 		global = BlofeldGlobal.new(this);
 		editBuffer = BlofeldEditBuffer.new(this);
+		aliases = ();
 		if (Blofeld.numInstances == 1, {
 			this.makeDefault();
 		});
@@ -184,18 +186,45 @@ Blofeld {
 	}
 
 	// selectSound("h80") == selectSound(\h, 79)
-	selectSound { |bank, program, chan = 0|
+	selectSound { |bank, program, chan = 0, alias = nil|
 		if (bank.isString, {
+			alias = chan;
 			chan = program;
 			program = bank[1..].asInteger - 1;
 			bank = bank[0].asSymbol;
 		});
 		this.setBank(bank, chan);
 		this.program(program, chan);
+		if (alias != nil, {
+			this.setAlias(alias, chan);
+		});
 	}
 
-	selectRandomSound { |chan = 0|
-		this.selectSound(rrand(0, Blofeld.bank.size-1), rrand(0, 127), chan);
+	selectRandomSound { |chan = 0, alias = nil|
+		this.selectSound(rrand(0, Blofeld.bank.size-1), rrand(0, 127), chan, alias);
+	}
+
+	setAlias { |alias, chan|
+		aliases[alias] = chan;
+	}
+
+	pdef { |chan, pairs = nil, quant = 1|
+		var alias = chan;
+		if (chan.isSymbol) {
+			chan = aliases[chan];
+		} {
+			alias = aliases.findKeyForValue(chan);
+			if (alias == nil) {
+				alias = ("chan" ++ chan).asSymbol;
+				this.setAlias(alias, chan);
+			};
+		};
+		if (pairs != nil) {
+			pairs = pairs.addAll([\type, \blofeld, \chan, chan]);
+			Pdef(alias, Pbind(*pairs));
+			Pdef(alias).quant = quant;
+		};
+		^Pdef(alias);
 	}
 
 	download { |obj, callback = nil|
