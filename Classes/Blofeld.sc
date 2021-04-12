@@ -66,8 +66,10 @@ Blofeld {
 				) {
 					~blofeld.editBuffer.set(key, currentEnvironment[key], chan, useCache);
 				} {
-					// pan CC does not work, therefore whole multidump needs to be uploaded
-					if (key == \pan) {
+					// volume (7) and pan (10) CC does not work,
+					// therefore whole multidump needs to be uploaded
+					// (multidump works only when MidiIn is connected)
+					if (key == \pan || key == \vol) {
 						~blofeld.editBuffer.set((key.asString ++ (chan + 1)).asSymbol, currentEnvironment[key], chan, useCache);
 					} {
 						if (BlofeldGlobal.byName[key] != nil) {
