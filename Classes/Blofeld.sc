@@ -181,7 +181,13 @@ Blofeld {
 		midiOut.noteOff(chan, note, veloc);
 	}
 
+	// selectSound("h80") == selectSound(\h, 79)
 	selectSound { |bank, program, chan = 0|
+		if (bank.isString, {
+			chan = program;
+			program = bank[1..].asInteger - 1;
+			bank = bank[0].asSymbol;
+		});
 		this.setBank(bank, chan);
 		this.program(program, chan);
 	}
