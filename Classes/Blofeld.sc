@@ -152,6 +152,10 @@ Blofeld {
 		// todo: do we need to throw an error?
 	}
 
+	fixMultiChannel3 {
+		editBuffer.set(\chan3, 4);
+	}
+
 	soundBrowser { |loadSoundsets = \all|
 		soundBrowser = BlofeldSoundBrowser.new(this);
 		if (loadSoundsets != nil) {

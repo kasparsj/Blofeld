@@ -52,22 +52,20 @@ BlofeldGlobal {
 	}
 
 	doUpload_ { |callback = nil|
-		var r = Routine({
+		var r = {
 			blofeld.globalDump(this);
 			if (callback != nil, {
 				1.wait;
 				callback.value;
 			});
-		});
-		r.play;
+		}.fork;
 		^r;
 	}
 
 	multiMode { |value = nil, upload = true|
 		var bParam = byName[\multiMode];
 		value = if (value != nil, {
-			//this.setGlobalParam(\multiMode, value, sendGlobal);
-			Error("Multimode needs to be switched on manually").throw;
+			this.set(\multiMode, value, upload);
 		}, {
 			data[bParam.sysex];
 		});

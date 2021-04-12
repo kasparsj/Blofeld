@@ -175,6 +175,10 @@ BlofeldEditBuffer {
 		});
 	}
 
+	clearMulti {
+		multi = nil;
+	}
+
 	onSoundDump { |callback = nil|
 		^{|bank, location, data|
 			var sound = this.getOrCreatePart(location);
