@@ -84,10 +84,10 @@ BlofeldEditBuffer {
 		value = bParam.value(value.asInteger);
 		^if (multi == nil, {
 			this.downloadMulti({
-				Routine({
+				{
 					1.wait;
 					this.doSetMultiParam_(bParam, value);
-				}).play;
+				}.fork;
 			});
 			value;
 		}, {

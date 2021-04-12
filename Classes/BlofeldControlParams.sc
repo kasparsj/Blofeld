@@ -7,6 +7,8 @@ BlofeldControlParams {
 		params = [
 			// control only
 			BlofeldParam.new(\bankMSB, nil, 0, (0..127)), //
+			// pan does not work
+			// to change panning in multimode, whole multidump needs to be uploaded
 			BlofeldParam.new(\pan, nil, 10, (0..127)),
 			BlofeldParam.new(\expression, nil, 11, (0..127)),
 			BlofeldParam.new(\bankLSB, nil, 32, Blofeld.bank), // (a...h)

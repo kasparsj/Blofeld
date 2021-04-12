@@ -38,6 +38,7 @@ Blofeld {
 	classvar <tempo;
 	classvar <numInstances = 0;
 	classvar <>defaultChan = 0;
+	classvar <>debug = false;
 
 	var <>deviceID;
 	var <sounds;
@@ -65,12 +66,17 @@ Blofeld {
 				) {
 					~blofeld.editBuffer.set(key, currentEnvironment[key], chan, useCache);
 				} {
-					if (BlofeldGlobal.byName[key] != nil) {
-						// todo: implement changed
-						var changed = true;
-						~blofeld.global.set(key, currentEnvironment[key]);
-						uploadGlobal = (uploadGlobal || changed);
-					};
+					// pan CC does not work, therefore whole multidump needs to be uploaded
+					if (key == \pan) {
+						~blofeld.editBuffer.set((key.asString ++ (chan + 1)).asSymbol, currentEnvironment[key], chan, useCache);
+					} {
+						if (BlofeldGlobal.byName[key] != nil) {
+							// todo: implement changed
+							var changed = true;
+							~blofeld.global.set(key, currentEnvironment[key]);
+							uploadGlobal = (uploadGlobal || changed);
+						};
+					}
 				};
 			});
 			if (uploadGlobal) {
@@ -278,6 +284,9 @@ Blofeld {
 	sysex { |packet|
 		packet = packet.addFirst(BlofeldSysex.sysexBegin);
 		packet = packet.add(BlofeldSysex.sysexEnd);
+		if (debug, {
+			"sysex, cmd: %, (%, %)".format(packet[4], packet[5], packet[6]).postln;
+		});
 		midiOut.sysex(packet);
 	}
 

@@ -15,7 +15,6 @@ BlofeldSysex {
 	const <paramChangeIDM = 0x20;
 
 	classvar <callbacks;
-	classvar <>debug = false;
 
 	*initClass {
 		callbacks = ();
@@ -29,7 +28,7 @@ BlofeldSysex {
 			var deviceID = packet[3];
 			switch (packet[4],
 				paramChangeIDM, {
-					if (debug, {
+					if (Blofeld.debug, {
 						var bParam = BlofeldSound.bySysex[(packet[6] * 128 + packet[7])];
 						"Param change, loc: %, %: %".format(packet[5], bParam.name, packet[8]).postln;
 					});
@@ -39,6 +38,9 @@ BlofeldSysex {
 					var program = packet[6];
 					var data = packet[7..389];
 					var key = Blofeld.soundKey(bank, program, deviceID);
+					if (Blofeld.debug, {
+						"Sound dump received, bank: %, program: %".format(bank, program).postln;
+					});
 					callbacks[key].value(bank, program, data);
 				},
 				multiDumpIDM, {
@@ -46,6 +48,9 @@ BlofeldSysex {
 					var slot = packet[6];
 					var data = packet[7..422];
 					var key = Blofeld.multiKey(bank, slot, deviceID);
+					if (Blofeld.debug, {
+						"Multi dump received, bank: %, slot: %".format(bank, slot).postln;
+					});
 					callbacks[key].value(slot, bank, data);
 				},
 				wavetableDumpIDM, {
@@ -54,11 +59,18 @@ BlofeldSysex {
 				globalDumpIDM, {
 					var data = packet[5..76];
 					var key = Blofeld.globalKey(deviceID);
+					if (Blofeld.debug, {
+						"Global dump received, key: %".format(key).postln;
+					});
 					callbacks[key].value(data);
 				}, {
-					if (debug, { packet.postln; });
+					if (Blofeld.debug, { packet.postln; });
 				}
 			);
+		} {
+			if (Blofeld.debug, { 
+				"Non Blofeld packet received: % %".format(packet[1], packet[2]).postln;
+			});
 		};
 	}
 
