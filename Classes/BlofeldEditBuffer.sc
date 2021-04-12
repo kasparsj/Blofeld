@@ -81,7 +81,7 @@ BlofeldEditBuffer {
 	}
 
 	setMultiParam { |bParam, value = 0|
-		value = bParam.value(value.asInteger);
+		value = bParam.value(value);
 		^if (multi == nil, {
 			this.downloadMulti({
 				{

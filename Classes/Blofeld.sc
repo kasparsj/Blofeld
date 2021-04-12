@@ -69,7 +69,7 @@ Blofeld {
 					// volume (7) and pan (10) CC does not work,
 					// therefore whole multidump needs to be uploaded
 					// (multidump works only when MidiIn is connected)
-					if (key == \pan || key == \vol) {
+					if ((key == \pan) || (key == \vol)) {
 						~blofeld.editBuffer.set((key.asString ++ (chan + 1)).asSymbol, currentEnvironment[key], chan, useCache);
 					} {
 						if (BlofeldGlobal.byName[key] != nil) {
@@ -279,7 +279,7 @@ Blofeld {
 
 	program { |num, chan = 0|
 		midiOut.program(chan, num);
-		editBuffer.clear;
+		editBuffer.clear(chan);
 	}
 
 	control { |param, value = 0, chan = 0|
