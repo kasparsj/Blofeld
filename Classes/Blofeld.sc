@@ -212,20 +212,30 @@ Blofeld {
 		aliases[alias] = chan;
 	}
 
-	pdef { |chan, pairs = nil, quant = 1|
-		var alias = chan;
+	getOrSetAlias { |chan|
+		var alias = aliases.findKeyForValue(chan);
+		if (alias == nil) {
+			alias = ("chan" ++ chan).asSymbol;
+			this.setAlias(alias, chan);
+		};
+		^alias;
+	}
+
+	pbind { |pairs, chan = 0|
 		if (chan.isSymbol) {
 			chan = aliases[chan];
-		} {
-			alias = aliases.findKeyForValue(chan);
-			if (alias == nil) {
-				alias = ("chan" ++ chan).asSymbol;
-				this.setAlias(alias, chan);
-			};
+		};
+		pairs = pairs.addAll([\type, \blofeld, \chan, chan]);
+		^Pbind(*pairs);
+	}
+
+	pdef { |chan, pairs = nil, quant = 1|
+		var alias = chan;
+		if (chan.isInteger) {
+			alias = this.getOrSetAlias(chan);
 		};
 		if (pairs != nil) {
-			pairs = pairs.addAll([\type, \blofeld, \chan, chan]);
-			Pdef(alias, Pbind(*pairs));
+			Pdef(alias, this.pbind(pairs, chan));
 			Pdef(alias).quant = quant;
 		};
 		^Pdef(alias);

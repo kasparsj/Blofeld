@@ -30,7 +30,7 @@ BlofeldEditBuffer {
 		};
 	}
 
-	fromTo { |param, startValue, endValue, duration, location = 0, curve = \lin, step = 0.1|
+	fromTo { |param, startValue, endValue, duration, location = 0, curve = \lin, step = 0.1, onComplete = nil|
 		var r = routines[location];
 		if (r != nil) {
 			if (r[param] != nil) {
@@ -49,17 +49,20 @@ BlofeldEditBuffer {
 				step.wait;		
 				time = time + step;
 			});
+			if (onComplete != nil, {
+				onComplete.value;
+			});
 			r.removeAt(param);
 		}.fork;
 		^r[param];
 	}
 
-	to { |param, endValue, duration, location = 0, curve = \lin, step = 0.1|
-		^this.fromTo(param, this.get(param, location), endValue, duration, location, curve, step);
+	to { |param, endValue, duration, location = 0, curve = \lin, step = 0.1, onComplete = nil|
+		^this.fromTo(param, this.get(param, location), endValue, duration, location, curve, step, onComplete);
 	}
 
-	from { |param, startValue, duration, location = 0, curve = \lin, step = 0.1|
-		^this.fromTo(param, startValue, this.get(param, location), duration, location, curve, step);
+	from { |param, startValue, duration, location = 0, curve = \lin, step = 0.1, onComplete = nil|
+		^this.fromTo(param, startValue, this.get(param, location), duration, location, curve, step, onComplete);
 	}
 
 	setSoundParam { |bParam, value = 0, location = 0, useCache = false|
