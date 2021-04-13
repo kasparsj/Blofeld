@@ -132,6 +132,17 @@ Blofeld {
 		midiOut = MIDIOut.newByName(deviceName, portName);
 	}
 
+	tryConnect { |pairs|
+		block {|break|
+			pairs.pairsDo { |deviceName, portName|
+				if (MIDIOut.findPort(deviceName, portName) != nil) {
+					this.connect(deviceName, portName);
+					break.value;
+				};
+			};
+		};
+	}
+
 	isConnected {
 		^(midiOut != nil);
 	}
