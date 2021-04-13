@@ -46,6 +46,7 @@ Blofeld {
 	var <global;
 	var <editBuffer;
 	var <aliases;
+	var <pbindStore;
 	var <midiOut;
 	var <midiOn;
 	var <midiOff;
@@ -105,6 +106,7 @@ Blofeld {
 		global = BlofeldGlobal.new(this);
 		editBuffer = BlofeldEditBuffer.new(this);
 		aliases = ();
+		pbindStore = ();
 		if (Blofeld.numInstances == 1, {
 			this.makeDefault();
 		});
@@ -232,24 +234,16 @@ Blofeld {
 		^alias;
 	}
 
-	pbind { |pairs, chan = 0|
+	pbind { |pairs, chan = 0, store = true|
 		if (chan.isSymbol) {
 			chan = aliases[chan];
 		};
+		if (store) {
+			pairs = if (pbindStore[chan] != nil, { pbindStore[chan] }, { [] }).addAll(pairs);
+			pbindStore[chan] = pairs.copy;
+		};
 		pairs = pairs.addAll([\type, \blofeld, \chan, chan]);
 		^Pbind(*pairs);
-	}
-
-	pdef { |chan, pairs = nil, quant = 1|
-		var alias = chan;
-		if (chan.isInteger) {
-			alias = this.getOrSetAlias(chan);
-		};
-		if (pairs != nil) {
-			Pdef(alias, this.pbind(pairs, chan));
-			Pdef(alias).quant = quant;
-		};
-		^Pdef(alias);
 	}
 
 	download { |obj, callback = nil|
