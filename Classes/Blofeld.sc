@@ -328,6 +328,7 @@ Blofeld {
 	program { |num, chan = 0|
 		midiOut.program(chan, num);
 		editBuffer.clear(chan);
+		pbindStore.removeAt(chan);
 	}
 
 	control { |param, value = 0, chan = 0|
