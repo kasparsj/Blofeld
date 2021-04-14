@@ -3,16 +3,16 @@ BlofeldEditBuffer {
 
 	var <blofeld;
 	var <parts;
-	var <routines;
 	var <>multi;
+	var dummyObj;
 
 	*new { |blofeld|
-		^super.newCopyArgs(blofeld, Array.newClear(16), Array.newClear(16), nil);
+		^super.newCopyArgs(blofeld, Array.newClear(16), nil, ());
 	}
 
 	get { |param, location = 0|
 		var sound = parts[location];
-		var value = if (sound != nil, { sound.get(param) }, { nil });
+		var value = if (sound != nil, { sound[param] }, { nil });
 		^value;
 	}
 
@@ -30,39 +30,20 @@ BlofeldEditBuffer {
 		};
 	}
 
-	fromTo { |param, startValue, endValue, duration, location = 0, curve = \lin, step = 0.1, onComplete = nil|
-		var r = routines[location];
-		if (r != nil) {
-			if (r[param] != nil) {
-				r[param].stop;
-				r.removeAt(param);
-			};
-		} {
-			routines[location] = ();
-			r = routines[location];
+	fromTo { |param, startValue, endValue, duration, location = 0, options = nil|
+		options = options ? ();
+		options[\onUpdate] = { |value|
+			this.set(param, value, location);
 		};
-		r[param] = {
-			var env = Env([startValue, endValue], [duration], curve);
-			var time = 0;
-			while ({time <= duration}, {
-				this.set(param, env.at(time), location);
-				step.wait;		
-				time = time + step;
-			});
-			if (onComplete != nil, {
-				onComplete.value;
-			});
-			r.removeAt(param);
-		}.fork;
-		^r[param];
+		^Tween.fromTo(dummyObj, param, startValue, endValue, duration, options);
 	}
 
-	to { |param, endValue, duration, location = 0, curve = \lin, step = 0.1, onComplete = nil|
-		^this.fromTo(param, this.get(param, location), endValue, duration, location, curve, step, onComplete);
+	to { |param, endValue, duration, location = 0, options = nil|
+		^this.fromTo(param, this.get(param, location), endValue, duration, location, options);
 	}
 
-	from { |param, startValue, duration, location = 0, curve = \lin, step = 0.1, onComplete = nil|
-		^this.fromTo(param, startValue, this.get(param, location), duration, location, curve, step, onComplete);
+	from { |param, startValue, duration, location = 0, options = nil|
+		^this.fromTo(param, startValue, this.get(param, location), duration, location, options);
 	}
 
 	setSoundParam { |bParam, value = 0, location = 0, useCache = false|

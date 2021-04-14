@@ -124,7 +124,7 @@ BlofeldSoundset {
 	choose { |category = nil|
 		var set = sounds;
 		if (category != nil, {
-			set = set.select({|s| s.get(\category) == category })
+			set = set.select({|s| s[\category] == category })
 		});
 		^set.choose;
 	}

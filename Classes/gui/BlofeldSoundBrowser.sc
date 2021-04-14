@@ -203,7 +203,7 @@ BlofeldSoundBrowser {
 		});
 		soundsArray = Array.newClear(buttonsPerPage);
 		currentSounds = soundsCache.select({ |sound|
-			var accept = (sound.get(\category) == (if (currentCategory != \all, { Blofeld.category[currentCategory.asSymbol] }, { sound.get(\category) }))) &&
+			var accept = (sound[\category] == (if (currentCategory != \all, { Blofeld.category[currentCategory.asSymbol] }, { sound[\category] }))) &&
 			(sound.soundset.name == (if (currentSoundset != \all, { currentSoundset.asSymbol }, { sound.soundset.name }))) &&
 			(if (searchText.size > 0, { sound.getName().containsi(searchText) }, { true }));
 			if (accept, {
@@ -225,7 +225,7 @@ BlofeldSoundBrowser {
 			var sound = currentSounds[i];
 			var indexDownByColumn = i % numberOfRows * numberOfColumns + i.div(numberOfRows);
 			buttonArray[indexDownByColumn].string = sound.getName();
-			buttonArray[indexDownByColumn].background = backgrounds[sound.get(\category)];
+			buttonArray[indexDownByColumn].background = backgrounds[sound[\category]];
 			soundsArray[indexDownByColumn] = sound;
 		});
 		numPages = (totalCount / buttonsPerPage).ceil.asInteger;
@@ -264,7 +264,7 @@ BlofeldSoundBrowser {
 		currentSoundText.string = currentSound.getName();
 		currentSoundNameText.string = currentSound.getName();
 		currentSoundSetText.string = currentSound.soundset.name.asString;
-		currentSoundLocationText.string = Blofeld.bank.findKeyForValue(currentSound.bank).asString.toUpper ++ (currentSound.program+1).asString.padLeft(3, "0") + ", category:" + currentSound.getCategory();
+		currentSoundLocationText.string = Blofeld.bank.findKeyForValue(currentSound.bank).asString.toUpper ++ (currentSound.program+1).asString.padLeft(3, "0") + ", category:" + currentSound[\category];
 
 		filterEnv = currentSound.getEnv("filterEnv") / 127.0;
 		filterEnv[0][1] = filterEnv[0][1]/3;

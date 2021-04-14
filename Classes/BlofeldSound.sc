@@ -42,10 +42,10 @@ BlofeldSound {
 			};
 		};
 		this.setName(name);
-		this.setCategory(Blofeld.category[cat]);
+		this[\category] = Blofeld.category[cat];
 	}
 
-	get { |param|
+	at { |param|
 		var bParam = byName[param];
 		var value = if (bParam != nil, {
 			if (bParam.sysex != nil, { data[bParam.sysex] });
@@ -55,7 +55,7 @@ BlofeldSound {
 		^value;
 	}
 
-	set { |param, value|
+	put { |param, value|
 		var bParam = byName[param];
 		value = if (bParam != nil, {
 			data[bParam.sysex] = bParam.value(value);
@@ -164,16 +164,6 @@ BlofeldSound {
 			var bParam = bySysex[i+363];
 			data[bParam.sysex] = if (value[i] == nil, { 0 }, { value[i].ascii });
 		}
-	}
-
-	getCategory {
-		var bParam = bySysex[379];
-		^bParam.label(data[bParam.sysex]);
-	}
-
-	setCategory { |value|
-		var bParam = bySysex[379];
-		data[bParam.sysex] = value;
 	}
 
 	getOscInfo { |name, fullInfo = false|

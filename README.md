@@ -19,7 +19,7 @@ var program = rrand(0, 127);
 ~blofeld.editBuffer.download({|sound|
 	sound.printInfo;
 	//sound.printInfo(true); // print full info
-	sound.get(\filter1Type).postln;
+	sound[\filter1Type].postln;
 });
 // print implemented param names
 BlofeldSound.byName.keys.postln;
