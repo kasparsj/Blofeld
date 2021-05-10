@@ -3,5 +3,5 @@
 	\path: 		"Blofeld",
 	\summary:	"Blofeld class",
 	\author: 	"Kaspars Jaudzems",
-    \dependencies:  [git://github.com/kasparsj/SCClasses],
+    \dependencies:  ["git://github.com/kasparsj/SCClasses"],
 )
