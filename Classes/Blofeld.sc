@@ -114,11 +114,15 @@ Blofeld {
 	}
 
 	deinit {
-		16.do { |i|
-			this.control(\allNotesOff, 0, i);
-		};
-		midiOn.free;
-		midiOff.free;
+		if (midiOut != nil, {
+			16.do { |i|
+				this.control(\allNotesOff, 0, i);
+			};
+		});
+		if (midiOn != nil, {
+			midiOn.free;
+			midiOff.free;
+		});
 	}
 
 	connect { |deviceName, portName, forceInit = false|
